@@ -44,7 +44,7 @@ def Create_Font_maker(Font_dir, back_ground_color, font_color, font_name, font_s
 def main():
     global Font_dir, korean_label
 
-    with open('../labels/256_common_hangul.txt', 'r', encoding='utf8') as f:
+    with open('../labels/2350_common_hangul.txt', 'r', encoding='utf8') as f:
         for line in f:
             if 'str' in line:
                 break
