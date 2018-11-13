@@ -10,8 +10,8 @@ def makeImage(font_name):
 		os.makedirs(font_name)
 
 	# configuration
-	width = 490
-	height = 56
+	width = 512
+	height = 64
 	back_ground_color = (255, 255, 255)
 	font_color = (0, 0, 0)
 	font_size = 36
@@ -116,8 +116,6 @@ def makeImage(font_name):
 	font_total_size += font_size + random_size_between_font
 
 	im.save(os.path.join('./', font_name + '.jpg'))
-
-	#Create_Font_maker(Font_dir, back_ground_color, font_color, font_name, font_size, korean_label)
 
 def main():
 	global Font_dir, korean_label

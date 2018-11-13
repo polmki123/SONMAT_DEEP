@@ -12,8 +12,8 @@ def makeImage(font_name):
 		os.makedirs(font_name)
 
 	# configuration
-	width = 450
-	height = 58
+	width = 512
+	height = 64
 	back_ground_color = (255, 255, 255)
 	font_color = (0, 0, 0)
 	font_size = 36
@@ -183,22 +183,12 @@ def makeImage(font_name):
 	im = ImageOps.invert(im)
 	im.save(os.path.join('./', font_name + '.jpg'))
 
-	# Create_Font_maker(Font_dir, back_ground_color, font_color, font_name, font_size, korean_label)
-
 def main():
 	global Font_dir, korean_label
 
-	# with open('../labels/256_common_hangul.txt', 'r', encoding='utf8') as f:
-	#     for line in f:
-	#         if 'str' in line:
-	#             break
-	#         korean_label.append(line[0])
-
 	list_files = os.listdir(Font_dir)
 	for i in list_files:
-		# print(i)
 		makeImage(i)
-	# print(korean_label)
 
 
 if __name__ == '__main__':
