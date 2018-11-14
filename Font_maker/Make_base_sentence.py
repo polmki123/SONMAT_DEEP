@@ -23,6 +23,7 @@ def makeImage(font_name):
 	unicode_font = ImageFont.truetype(os.path.join(Font_dir, font_name), font_size)
 	draw.text ( (10,10), unicode_text, font=unicode_font, fill=font_color )
 
+	#im = im.convert('L')
 	im.save(os.path.join(font_name + '.jpg'))
 
 def main():

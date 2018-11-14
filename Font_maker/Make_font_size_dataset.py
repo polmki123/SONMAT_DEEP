@@ -1,7 +1,6 @@
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from random import*
 import os
-# import cv2
 
 korean_label = []
 Font_dir = '../Font_maker/Font/'
@@ -19,6 +18,8 @@ def makeImage(font_name):
 	font_total_size = 10
 	space_size = 10
 	space_tatal_size = 0
+
+	top_space = 10
 
 	unicode_text = u"다"
 	unicode_text2 = u"람"
@@ -42,19 +43,19 @@ def makeImage(font_name):
 	#다
 	font_random_size = randint(24, 48)
 	unicode_font = ImageFont.truetype(os.path.join(Font_dir, font_name), font_random_size)
-	draw.text((10, 0), unicode_text, font=unicode_font, fill=font_color)
+	draw.text((10, top_space), unicode_text, font=unicode_font, fill=font_color)
 	font_total_size += font_random_size
 
 	#람
 	font_random_size = randint(24, 48)
 	unicode_font = ImageFont.truetype(os.path.join(Font_dir, font_name), font_random_size)
-	draw.text((font_total_size, 0), unicode_text2, font=unicode_font, fill=font_color)
+	draw.text((font_total_size, top_space), unicode_text2, font=unicode_font, fill=font_color)
 	font_total_size += font_random_size
 
 	#쥐
 	font_random_size = randint(24, 48)
 	unicode_font = ImageFont.truetype(os.path.join(Font_dir, font_name), font_random_size)
-	draw.text((font_total_size, 0), unicode_text3, font=unicode_font, fill=font_color)
+	draw.text((font_total_size, top_space), unicode_text3, font=unicode_font, fill=font_color)
 	font_total_size += font_random_size
 
 	#space
@@ -63,7 +64,7 @@ def makeImage(font_name):
 	#헌
 	font_random_size = randint(24, 48)
 	unicode_font = ImageFont.truetype(os.path.join(Font_dir, font_name), font_random_size)
-	draw.text((font_total_size + space_tatal_size, 0), unicode_text4, font=unicode_font, fill=font_color)
+	draw.text((font_total_size + space_tatal_size, top_space), unicode_text4, font=unicode_font, fill=font_color)
 	font_total_size += font_random_size
 
 	#space
@@ -72,25 +73,25 @@ def makeImage(font_name):
 	#쳇
 	font_random_size = randint(24, 48)
 	unicode_font = ImageFont.truetype(os.path.join(Font_dir, font_name), font_random_size)
-	draw.text((font_total_size + space_tatal_size, 0), unicode_text5, font=unicode_font, fill=font_color)
+	draw.text((font_total_size + space_tatal_size, top_space), unicode_text5, font=unicode_font, fill=font_color)
 	font_total_size += font_random_size
 
 	#바
 	font_random_size = randint(24, 48)
 	unicode_font = ImageFont.truetype(os.path.join(Font_dir, font_name), font_random_size)
-	draw.text((font_total_size + space_tatal_size, 0), unicode_text6, font=unicode_font, fill=font_color)
+	draw.text((font_total_size + space_tatal_size, top_space), unicode_text6, font=unicode_font, fill=font_color)
 	font_total_size += font_random_size
 
 	#퀴
 	font_random_size = randint(24, 48)
 	unicode_font = ImageFont.truetype(os.path.join(Font_dir, font_name), font_random_size)
-	draw.text((font_total_size + space_tatal_size, 0), unicode_text7, font=unicode_font, fill=font_color)
+	draw.text((font_total_size + space_tatal_size, top_space), unicode_text7, font=unicode_font, fill=font_color)
 	font_total_size += font_random_size
 
 	#에
 	font_random_size = randint(24, 48)
 	unicode_font = ImageFont.truetype(os.path.join(Font_dir, font_name), font_random_size)
-	draw.text((font_total_size + space_tatal_size, 0), unicode_text8, font=unicode_font, fill=font_color)
+	draw.text((font_total_size + space_tatal_size, top_space), unicode_text8, font=unicode_font, fill=font_color)
 	font_total_size += font_random_size
 
 	#space
@@ -99,21 +100,22 @@ def makeImage(font_name):
 	#타
 	font_random_size = randint(24, 48)
 	unicode_font = ImageFont.truetype(os.path.join(Font_dir, font_name), font_random_size)
-	draw.text((font_total_size + space_tatal_size, 0), unicode_text9, font=unicode_font, fill=font_color)
+	draw.text((font_total_size + space_tatal_size, top_space), unicode_text9, font=unicode_font, fill=font_color)
 	font_total_size += font_random_size
 
 	#고
 	font_random_size = randint(24, 48)
 	unicode_font = ImageFont.truetype(os.path.join(Font_dir, font_name), font_random_size)
-	draw.text((font_total_size + space_tatal_size, 0), unicode_text10, font=unicode_font, fill=font_color)
+	draw.text((font_total_size + space_tatal_size, top_space), unicode_text10, font=unicode_font, fill=font_color)
 	font_total_size += font_random_size
 
 	#파
 	font_random_size = randint(24, 48)
 	unicode_font = ImageFont.truetype(os.path.join(Font_dir, font_name), font_random_size)
-	draw.text((font_total_size + space_tatal_size, 0), unicode_text11, font=unicode_font, fill=font_color)
+	draw.text((font_total_size + space_tatal_size, top_space), unicode_text11, font=unicode_font, fill=font_color)
 	font_total_size += font_random_size
 
+	im = im.convert('L')
 	im.save(os.path.join('./', font_name + '.jpg'))
 
 def main():

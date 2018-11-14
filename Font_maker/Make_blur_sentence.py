@@ -1,21 +1,25 @@
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageOps
-import os
 import cv2
+from random import *
+import os
 
 korean_label = []
-img_dir = '../Font_maker/basic_Font/'
+Font_dir = '../Font_maker/basic_Font/'
 
-def makeImage(img_name):
-    img = cv2.imread(img_name)
-    blur = cv2.blur(img,(3,3))
-    cv2.imshow('blur',blur)
-    cv2.waitKey(0)
+def makeImage(font_name):
+	blur_random = randint(3,5)
+
+	img = cv2.imread(Font_dir + font_name)
+	im = cv2.blur(img, (blur_random,blur_random))
+
+	im = im.convert('L')
+	im.save(os.path.join('./', font_name + '.jpg'))
+
 def main():
 	global Font_dir, korean_label
 	list_files = os.listdir(Font_dir)
 	for i in list_files:
-		makeImage(img_dir + i)
+		makeImage(i)
 
 if __name__ == '__main__':
 	main()
-
