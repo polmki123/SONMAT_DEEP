@@ -25,8 +25,9 @@ def makeImage(font_name):
         im  =  Image.new ( "RGB", (label_width,label_height), back_ground_color )
         draw  =  ImageDraw.Draw ( im )
         unicode_font = ImageFont.truetype(os.path.join(Font_dir, font_name), font_size)
-        draw.text ( (15,11), label_item, font=unicode_font, fill=font_color )
+        draw.text ( (15,15), label_item, font=unicode_font, fill=font_color )
 
+        im = im.convert('L')
         im.save(os.path.join('./' + font_name, label_item + '.jpg'))
 
 def main():
