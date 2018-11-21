@@ -8,6 +8,7 @@ import glob
 import pickle
 import gzip
 import random
+import math
 default_model_dir = "./"
 
 def chunker(seq, size):
@@ -19,11 +20,20 @@ def normalize_image(img):
     """
     normalized = (img / 127.5) - 1.
     return normalized
+def normalize_function(img):
+    img = (img - np.min(img)) / (np.max(img) - np.min(img))
+    img = (img - img.mean()) / math.sqrt(np.var(img))
+    return img
+def renormalize_image(img):
+    renormalized = (img + 1) * 127.5
+    return renormalized
 
 def save_checkpoint(state, filename, model_dir):
 
     # model_dir = 'drive/app/torch/save_Routing_Gate_2'
-    model_filename = os.path.join(model_dir, filename)
+    #model_filename = os.path.join(model_dir, filename)
+    model_filename = model_dir + filename
+    print(model_filename)
     latest_filename = os.path.join(model_dir, 'latest.txt')
 
     if not os.path.exists(model_dir):
@@ -59,29 +69,42 @@ def print_log(text, filename="log.txt"):
         myfile.write(text + "\n")
 
 
-def Package_Data_Slice_Loder():
+def Package_Data_Slice_Loder(number):
     numpy_x = list()
     numpy_label = list()
-    with gzip.open('../Conpress/train' + str(number) +'.pkl', "rb") as of:
+    transform = transforms.Compose(
+        [transforms.ToTensor(),
+         transforms.Normalize((0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5), (0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5))
+         ])
+    test_transform = transforms.Compose(
+        [transforms.ToTensor(),
+         transforms.Normalize((0.5),
+                              (0.5))
+         ])
+    with gzip.open('../Deep_model/Conpress/train_' + str(number) +'.pkl', "rb") as of:
         while True:
             try:
                 e = pickle.load(of)
                 numpy_x.extend(e[0])
                 numpy_label.extend(e[1])
+                 
                 if len(numpy_x) % 1000 == 0:
-                    print("processed %d examples" % len(numpy_x))
+                	print("processed %d examples" % len(numpy_x))
             except EOFError:
+                print('error')
                 break
             except Exception:
+                print('error')
                 pass
         print("unpickled total %d examples" % len(numpy_x))
 
     X_datas = np.array(numpy_x)
+    print(X_datas.shape)
     label_datas = np.array(numpy_label)
-
+    print(label_datas.shape)
     numpy_test = list()
     numpy_label_test = list()
-    with gzip.open('../Conpress/test' + str(number) + '.pkl', "rb") as of:
+    with gzip.open('../Deep_model/Conpress/test_' + str(number) + '.pkl', "rb") as of:
         while True:
             try:
                 e = pickle.load(of)
@@ -90,36 +113,31 @@ def Package_Data_Slice_Loder():
                 if len(numpy_test) % 1000 == 0:
                     print("processed %d examples" % len(numpy_test))
             except EOFError:
+                print('error')
                 break
             except Exception:
+                print('error')
                 pass
         print("unpickled total %d examples" % len(numpy_test))
         
     X_test_datas = np.array(numpy_test)
+    print(X_test_datas.shape)
     test_label_datas = np.array(numpy_label_test)
-    
-    
-    train_dataset = torch.from_numpy(X_datas), torch.from_numpy(label_datas)
-    train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
-                                               batch_size=512,
-                                               shuffle=True,
-                                               num_workers=4)
+    print(test_label_datas.shape)
+    train_dataset = torch.utils.data.TensorDataset(torch.from_numpy(X_datas), torch.from_numpy(label_datas))
 
-    test_dataset = torch.from_numpy(X_test_datas), torch.from_numpy(test_label_datas)
-    test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
-                                               batch_size=512,
-                                               shuffle=True,
-                                               num_workers=4)
-    return train_loader, test_loader
+    test_dataset = torch.utils.data.TensorDataset(torch.from_numpy(X_test_datas),torch.from_numpy(test_label_datas))
+    return train_dataset, test_dataset
 
 def Package_Data_Loder():
     numpy_x = list()
     numpy_label = list()
-    with gzip.open('../Conpress/train.pkl', "rb") as of:
+    with gzip.open('../Deep_model/Conpress/train.pkl', "rb") as of:
         while True:
             try:
                 e = pickle.load(of)
                 numpy_x.extend(e[0])
+                
                 numpy_label.extend(e[1])
                 if len(numpy_x) % 1000 == 0:
                     print("processed %d examples" % len(numpy_x))
@@ -362,7 +380,4 @@ def Slice_datalist(label_datalist, train_datalist):
 
 
 if __name__ == '__main__':
-    A = Data_loader()
-    print('end')
-    print(A.shape)
-    
+    Package_Data_Slice_Loder(1) 

@@ -1,5 +1,3 @@
-3# -*- coding: utf-8 -*-
-
 import argparse
 import glob
 import os
@@ -89,6 +87,7 @@ def pickle_slice_examples(package_dir):
     Concat_data_tolist = Slice_datalist(label_datalist, train_datalist)
     Concat_test_tolist = Slice_test_datalist(test_datalist, test_label_datalist)
     number = 0
+    
     for A in range(len(Concat_data_tolist)):
         train_datapath = list()
         for B in range(len(Concat_data_tolist[A])):
@@ -114,7 +113,7 @@ def pickle_slice_examples(package_dir):
                         X_datas.append(Concat_data)
                 # X_datas = np.array(X_datas)  # 2350*9*64*64
                 
-                label_paths = glob.glob(os.path.join(label_dir + label_datapath[i][:-4], "*.jpg"))  # label 데이터 읽기
+                label_paths = glob.glob(os.path.join(label_dir + label_datapath[i][:-4], "*.jpg"))  # label 
                 for p in label_paths:
                     label_image = np.array(Image.open(p))  # 64*64
                     label_image = normalize_image(label_image)
@@ -129,7 +128,7 @@ def pickle_slice_examples(package_dir):
                 example = (X_datas, label_datas)
                 pickle.dump(example, ft)
             ft.close()
-
+    
     number = 0
     for A in range(len(Concat_test_tolist)):
         test_datapath = list()
@@ -205,7 +204,7 @@ def pickle_examples(package_dir):
                         X_datas.append(Concat_data)
                 X_datas = np.array(X_datas) # 2350*9*64*64
                 print(X_datas.shape)
-                label_paths = glob.glob(os.path.join(label_dir + label[:-4], "*.jpg"))  # label 데이터 읽기
+                label_paths = glob.glob(os.path.join(label_dir + label[:-4], "*.jpg"))  # label
                 label_datas = []
                 for p in label_paths:
                     label_image = np.array(Image.open(p))  # 64*64
@@ -221,6 +220,7 @@ def pickle_examples(package_dir):
         
 
 if __name__ == "__main__":
-    package_dir = 'E:/Conpress/'
+    package_dir = '../Deep_model/Conpress/' 
+    print('start')
     pickle_slice_examples(package_dir)
     

@@ -8,6 +8,9 @@ import utils
 import os
 import time
 import glob
+from PIL import Image
+import numpy as np
+import PIL.ImageOps
 os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 
 class VGG16(tnn.Module):
@@ -155,10 +158,12 @@ def train(model, optimizer, criterion, train_loader, epoch):
         else:
             data, target = Variable(data), Variable(target)
         data = data.type(torch.cuda.FloatTensor)
-        #print(data.type())
+        data = renormalize_image(data)
+        data = normalize_function(data)
         target = target.type(torch.cuda.FloatTensor)
+        target = renormalize_image(target)
+        target = normalize_function(target)
         optimizer.zero_grad()
-        #assert (data >= 0. & data <= 1.).all()
         output = model(data)
         loss = criterion(output, target)
         loss.backward()
@@ -185,7 +190,11 @@ def test(model, criterion, test_loader, epoch):
         else:
             data, target = Variable(data), Variable(target)
         data = data.type(torch.cuda.FloatTensor)
+        data = renormalize_image(data)
+        data = normalize_function(data)
         target = target.type(torch.cuda.FloatTensor)
+        target = renormalize_image(target)
+        target = normalize_function(target)
         outputs = model(data)
         loss = criterion(outputs, target)
 
@@ -205,23 +214,18 @@ def test(model, criterion, test_loader, epoch):
 def main(model_dir, number):
     BATCH_SIZE = 128
     LEARNING_RATE = 0.01
-    EPOCH = 200
+    EPOCH = 200 
     
     train_Data, test_Data = utils.Package_Data_Slice_Loder(number+1)
-    #print(train_Data.shape)
-    # testData = dsets.ImageFolder('../data/imagenet/test', transform)
     
     train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
     test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
-    #dataiter = iter(train_loader)
-    #train_test, test_test = dataiter.next()
-    #print(train_test.shape)    
+
     utils.default_model_dir = model_dir
-    lr = 0.1
+    lr = 0.01
     start_time = time.time()
 
     model = VGG16()
-    #model.cuda()
     
     if torch.cuda.is_available():
         # os.environ["CUDA_VISIBLE_DEVICES"] = '0'
@@ -234,11 +238,12 @@ def main(model_dir, number):
         
     # Loss and Optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
-    # optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9, weight_decay=1e-4)
-    criterion = tnn.BCEWithLogitsLoss().cuda()
-
+    criterion = tnn.MSELoss().cuda()
+    #criterion = tnn.CrossEntropyLoss().cuda()
+    #criterion = tnn.BCEWithLogitsLoss().cuda()
+    #criterion = tnn.BCELoss().cuda()
     start_epoch = 0
-    checkpoint = utils.load_checkpoint(model_dir+str(number-1))
+    checkpoint = utils.load_checkpoint(model_dir+str(number))
 
     if not checkpoint:
         pass
@@ -247,10 +252,10 @@ def main(model_dir, number):
         model.load_state_dict(checkpoint['state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer'])
 
-    for epoch in range(0, EPOCH):
-        if epoch < 150:
+    for epoch in range(1, EPOCH+1):
+        if epoch < 100:
             learning_rate = lr
-        elif epoch < 225:
+        elif epoch < 150:
             learning_rate = lr * 0.1
         else:
             learning_rate = lr * 0.01
@@ -261,49 +266,66 @@ def main(model_dir, number):
         test(model, criterion, test_loader, epoch)
         
         if epoch % 20 == 0:
-            model_filename =  '/checkpoint_%02d.pth.tar' % epoch
+            model_filename = '/checkpoint_%02d.pth.tar' % epoch
             utils.save_checkpoint({
                 'epoch': epoch,
                 'model': model,
                 'state_dict': model.state_dict(),
                 'optimizer': optimizer.state_dict(),
-            }, model_filename, model_dir+str(number))
-        if epoch % 100 == 0:
-            saveimagedir = '../Deep_model/save_font_image/' + str(number) + '/' + str(epoch/100) + '/'
-            inputimagedir = '../Deep_model/Test1.jpg'
+            }, model_filename, model_dir+str(number+1))
+        if epoch % 10 == 0:
+            saveimagedir = '../Deep_model/save_font_image/' + str(number) + '/' + str(epoch) + '/'
+            inputimagedir = '../Deep_model/test1.jpg'
             input_data = input_Deepmodel_image(inputimagedir)
             model.eval()
-            number = 0
+            check_point = 0
             for i in input_data:
-                number = number + 1
+                check_point = check_point + 1
                 i = np.array(i)
                 i = i.reshape(1,9,64,64)
                 input = torch.from_numpy(i)
+                input = normalize_function(input)
                 input = Variable(input.cuda())
                 input = input.type(torch.cuda.FloatTensor)
                 output = model(input)
                 output = Variable(output).data.cpu().numpy()
-                output = output.reshape(64,64,1)
-                output = renormalize_image(output)
-                img = Image.fromarray(output.astype('unit'), 'L')
-                img.save(saveimagedir + str(number) + 'my.jpg')
+                output = output.reshape(64,64)
+                #print(output)
+                output = (output)*255
+                img = Image.fromarray(output.astype('uint8'), 'L')
+                #img = PIL.ImageOps.invert(img)
+                if not os.path.exists(saveimagedir):
+                    os.makedirs(saveimagedir)
+                img.save(saveimagedir + str(check_point) + 'my.jpg')
        
     # utils.conv_weight_L1_printing(model.module)
     now = time.gmtime(time.time() - start_time)
     print('{} hours {} mins {} secs for training'.format(now.tm_hour, now.tm_min, now.tm_sec))
 
-def input_Deepmodel_imge(inputimagedir) :
+def normalize_image(img):
+    """
+    Make image zero centered and in between (-1, 1)
+    """
+    normalized = (img / 127.5) - 1.
+    return normalized
+
+def renormalize_image(img):
+    renormalized = (img + 1) * 127.5
+    return renormalized
+
+def normalize_function(img):
+    img = (img - img.min()) / (img.max() - img.min())
+    #img = (img - img.mean()) / (img.std())
+    return img
+
+def input_Deepmodel_image(inputimagedir) :
     frame_dir = '../Deep_model/frame_label/'
     frame_paths = glob.glob(os.path.join(frame_dir, '*.jpg'))
     input_data = list()
     for frame in frame_paths :
         frame_image = np.array(Image.open(frame)).reshape(1,64,64)
-        frame_image = normalize_image(frame_image)
-        #print(frame_image.shape)
         input_image = np.array(Image.open(inputimagedir))
-        input_image = normalize_image(input_image)
         input_image = np.array(np.split(input_image, 8, axis=1))  # 8*64*64
-        #print(input_image.shape)
         Concat_data = np.append(input_image, frame_image, axis=0)
         if ((9, 64, 64) == Concat_data.shape):
             input_data.append(Concat_data)
