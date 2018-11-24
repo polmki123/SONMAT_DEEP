@@ -80,6 +80,7 @@ def train(model, optimizer, criterion_MSE, criterino_Cross_middle, criterion_Cro
     model.train()
     print_loss = 0
     print_loss2 = 0  
+    print_loss3 = 0
     total = 0
     correct = 0
     for batch_idx, (data, target, onehot_target) in enumerate(train_loader):
@@ -95,32 +96,34 @@ def train(model, optimizer, criterion_MSE, criterino_Cross_middle, criterion_Cro
         middle_loss = criterino_Cross_middle(output[1], onehot_target)
         image_loss = criterion_MSE(output[2], target)
         last_loss.backward(retain_graph=True)
+        middle_loss.backward(retain_graph=True)
         image_loss.backward(retain_graph=True)
         optimizer.step()
         print_loss += last_loss.item()
-        print_loss2 += image_loss.item()
+        print_loss2 += middle_loss.item()
+        print_loss3 += image_loss.item()
         _, predicted = torch.max(output[0].data, 1)
         total += target.size(0)
         correct += predicted.eq(onehot_target.data).sum()
         if batch_idx % 10 == 0:
-            utils.print_log('Epoch: {} | Batch: {} |  Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
-                  .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2 , 100. * correct / total, correct, total))
-            print('Epoch: {} | Batch: {} |  Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
-                  .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2 , 100. * correct / total, correct, total))
-            
+            utils.print_log('Epoch: {} | Batch: {} | Last_Cross_Losst: ({:.4f}) | Middle_Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
+                  .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2/(batch_idx+1), print_loss3 , 100. * correct / total, correct, total))
+            print('Epoch: {} | Batch: {} | Last_Cross_Losst: ({:.4f}) | Middle_Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
+                  .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2/(batch_idx+1), print_loss3 , 100. * correct / total, correct, total))
+
         
 def test(model, criterion_MSE, criterino_Cross_middle, criterion_Cross_last , test_loader, epoch):
     model.eval()
     print_loss = 0
     print_loss2 = 0  
+    print_loss3 = 0
     total = 0
     correct = 0
-    
-    for batch_idx, (data, target, onehot_target) in enumerate(test_loader):
+    for batch_idx, (data, target, onehot_target) in enumerate(train_loader):
         if torch.cuda.is_available():
             data, target, onehot_target = Variable(data.cuda()), Variable(target.cuda()), Variable(onehot_target.cuda())
         else:
-            data, target, onehot_target = Variable(data), Variable(target), Variable(onehot_target)
+            data, target, onehot_target  = Variable(data), Variable(target), Variable(onehot_target)
             
         data, target, onehot_target = setting_data(data, target, onehot_target)
         output = model(data)
@@ -129,16 +132,17 @@ def test(model, criterion_MSE, criterino_Cross_middle, criterion_Cross_last , te
         image_loss = criterion_MSE(output[2], target)
         
         print_loss += last_loss.item()
-        print_loss2 += image_loss.item()
+        print_loss2 += middle_loss.item()
+        print_loss3 += image_loss.item()
         _, predicted = torch.max(output[0].data, 1)
         total += target.size(0)
         correct += predicted.eq(onehot_target.data).sum()
         if batch_idx % 10 == 0:
-            utils.print_log('# TEST : Epoch: {} | Batch: {} |  Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
-                  .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2 , 100. * correct / total, correct, total))
-            print('# TEST : Epoch: {} | Batch: {} |  Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
-                  .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2 , 100. * correct / total, correct, total))
-
+            utils.print_log('Epoch: {} | Batch: {} | Last_Cross_Losst: ({:.4f}) | Middle_Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
+                  .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2/(batch_idx+1), print_loss3 , 100. * correct / total, correct, total))
+            print('Epoch: {} | Batch: {} | Last_Cross_Losst: ({:.4f}) | Middle_Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
+                  .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2/(batch_idx+1), print_loss3 , 100. * correct / total, correct, total))
+            
 
 def setting_data(data, target, onehot_target):
     data = data.type(torch.cuda.FloatTensor)
@@ -147,9 +151,9 @@ def setting_data(data, target, onehot_target):
     target = target.type(torch.cuda.FloatTensor)
     target = utils.renormalize_image(target)
     target = utils.normalize_function(target)
-    onehot_target = onehot_target.type(torch.cuda.FloatTensor)
+    onehot_target = onehot_target.squeeze(1)
+    onehot_target = onehot_target.type(torch.cuda.LongTensor)
     return data, target, onehot_target
-
 
 def do_learning(model_dir, number):
     global max_result
@@ -158,6 +162,6 @@ def do_learning(model_dir, number):
 
 if __name__ == '__main__':
     print(str(1)+'for train')   
-    model_dir = '../ResNet_Test1/model/{}'.format(1)
+    model_dir = '../ResNet_Test2/model/{}'.format(1)
     do_learning(model_dir, 1)
         

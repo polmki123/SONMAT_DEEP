@@ -109,7 +109,10 @@ def train(model, optimizer, criterion_MSE, criterion_Cross_last , train_loader, 
         
 def test(model, criterion_MSE, criterion_Cross_last , test_loader, epoch):
     model.eval()
-    
+    print_loss = 0
+    print_loss2 = 0  
+    total = 0
+    correct = 0
     for batch_idx, (data, target, onehot_target) in enumerate(test_loader):
         if torch.cuda.is_available():
             data, target, onehot_target = Variable(data.cuda()), Variable(target.cuda()), Variable(onehot_target.cuda())
@@ -140,7 +143,8 @@ def setting_data(data, target, onehot_target):
     target = target.type(torch.cuda.FloatTensor)
     target = utils.renormalize_image(target)
     target = utils.normalize_function(target)
-    onehot_target = onehot_target.type(torch.cuda.FloatTensor)
+    onehot_target = onehot_target.squeeze(1)
+    onehot_target = onehot_target.type(torch.cuda.LongTensor)
     return data, target, onehot_target
 
 
