@@ -64,16 +64,11 @@ def Slice_datalist(label_datalist, train_datalist):
         Concat_data_tolist.append(group)
     return Concat_data_tolist
 
-# using Copress data
-# Conpress data is amount 20
-# read train, test data
 def pickle_slice_examples(package_dir):
-	#read directory
     train_dir = '../Deep_model/Train_data/'
     frame_dir = '../Deep_model/frame_label/'
     label_dir = '../Deep_model/label/'
     
-    #read all handwrite data 
     file_list = os.listdir(train_dir)
     X_datas = []
     label_datas = []
@@ -81,8 +76,6 @@ def pickle_slice_examples(package_dir):
     label_datalist = []
     test_datalist = []
     test_label_datalist = []
-    
-    #read each handwrite data 
     for file in file_list:
         train_paths = glob.glob(os.path.join(train_dir + file, '*.jpg'))
         train_datalist.extend(train_paths[20:])
@@ -177,8 +170,7 @@ def pickle_slice_examples(package_dir):
                 pickle.dump(example, ft)
             ft.close()
 
-#learning for entire data but not use this learning 
-#because this data so big, That cause memory out 
+        
 def pickle_examples(package_dir):
     """
     Compile a list of examples into pickled format, so during

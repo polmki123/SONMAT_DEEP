@@ -27,14 +27,13 @@ def normalize_function(img):
 def renormalize_image(img):
     renormalized = (img + 1) * 127.5
     return renormalized
-
-def save_checkpoint(state, filename, model_dir):
+def Gener_save_checkpoint(state, filename, model_dir):
 
     # model_dir = 'drive/app/torch/save_Routing_Gate_2'
     #model_filename = os.path.join(model_dir, filename)
     model_filename = model_dir + filename
     print(model_filename)
-    latest_filename = os.path.join(model_dir, 'latest.txt')
+    latest_filename = os.path.join(model_dir, 'Gener_latest.txt')
 
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)
@@ -43,20 +42,53 @@ def save_checkpoint(state, filename, model_dir):
         fout.write(model_filename)
 
     torch.save(state, model_filename)
-    print("=> saving checkpoint '{}'".format(model_filename))
+    print("=>Gener saving checkpoint '{}'".format(model_filename))
 
     return
 
-def load_checkpoint(model_dir):
+def Discri_save_checkpoint(state, filename, model_dir):
 
     # model_dir = 'drive/app/torch/save_Routing_Gate_2'
-    latest_filename = os.path.join(model_dir, 'latest.txt')
+    #model_filename = os.path.join(model_dir, filename)
+    model_filename = model_dir + filename
+    print(model_filename)
+    latest_filename = os.path.join(model_dir, 'Discri_latest.txt')
+
+    if not os.path.exists(model_dir):
+        os.makedirs(model_dir)
+
+    with open(latest_filename, 'w') as fout:
+        fout.write(model_filename)
+
+    torch.save(state, model_filename)
+    print("=>Discri saving checkpoint '{}'".format(model_filename))
+
+    return
+
+def Gener_load_checkpoint(model_dir):
+
+    # model_dir = 'drive/app/torch/save_Routing_Gate_2'
+    latest_filename = os.path.join(model_dir, 'Gener_latest.txt')
     if os.path.exists(latest_filename):
         with open(latest_filename, 'r') as fin:
             model_filename = fin.readlines()[0]
     else:
         return None
-    print("=> loading checkpoint '{}'".format(model_filename))
+    print("=>Gener loading checkpoint '{}'".format(model_filename))
+    state = torch.load(model_filename)
+
+    return state
+
+def Discri_load_checkpoint(model_dir):
+
+    # model_dir = 'drive/app/torch/save_Routing_Gate_2'
+    latest_filename = os.path.join(model_dir, 'Discri_latest.txt')
+    if os.path.exists(latest_filename):
+        with open(latest_filename, 'r') as fin:
+            model_filename = fin.readlines()[0]
+    else:
+        return None
+    print("=>Discri loading checkpoint '{}'".format(model_filename))
     state = torch.load(model_filename)
 
     return state
@@ -69,7 +101,7 @@ def print_log(text, filename="log.txt"):
         myfile.write(text + "\n")
 
 
-def Package_Data_Slice_Loder(number):
+def Package_Data_Slice_Loader(number):
     numpy_x = list()
     numpy_label = list()
     transform = transforms.Compose(
@@ -129,7 +161,7 @@ def Package_Data_Slice_Loder(number):
     test_dataset = torch.utils.data.TensorDataset(torch.from_numpy(X_test_datas),torch.from_numpy(test_label_datas))
     return train_dataset, test_dataset
 
-def Package_Data_Loder():
+def Package_Data_Loader():
     numpy_x = list()
     numpy_label = list()
     with gzip.open('../Deep_model/Conpress/train.pkl', "rb") as of:
