@@ -16,17 +16,18 @@ from model import *
 os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 
 def main(model_dir, number):
+    utils.default_model_dir = model_dir
     BATCH_SIZE = 128
-    LEARNING_RATE = 0.01
+    lr = 0.01
     EPOCH = 200 
-    
-    train_Data, test_Data = utils.Package_Data_Slice_Loder(number+1)
+    start_epoch = 0
+    train_Data, test_Data = utils.Package_Data_onehot_Slice_Loder(number+1)
     
     train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
     test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
 
     utils.default_model_dir = model_dir
-    lr = 0.01
+    
     start_time = time.time()
 
     model = ResNet()
@@ -41,12 +42,10 @@ def main(model_dir, number):
         print("NO GPU -_-;")
         
     # Loss and Optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion_MSE = nn.MSELoss().cuda()
-    #criterion_Cross_middle = nn.CrossEntropyLoss().cuda()
+    criterino_Cross_middle = nn.CrossEntropyLoss().cuda()
     criterion_Cross_last = nn.CrossEntropyLoss().cuda()
-    #criterion = nn.BCELoss().cuda()
-    start_epoch = 0
     checkpoint = utils.load_checkpoint(model_dir+str(number))
 
     if not checkpoint:
@@ -66,8 +65,8 @@ def main(model_dir, number):
         for param_group in optimizer.param_groups:
             param_group['lr'] = learning_rate
     
-        train(model, optimizer, criterion_MSE, criterion_Cross_middle, criterion_Cross_last , train_loader, epoch)
-        test(model, optimizer, criterion_MSE, criterion_Cross_middle, criterion_Cross_last , train_loader, epoch)
+        train(model, optimizer, criterion_MSE, criterino_Cross_middle, criterion_Cross_last , train_loader, epoch)
+        test(model, criterion_MSE, criterino_Cross_middle, criterion_Cross_last , test_loader, epoch)
         utils.save_model_checkpoint(epoch, model, model_dir, number, optimizer)
         utils.check_model_result_image(epoch, model, number)
         
@@ -77,63 +76,68 @@ def main(model_dir, number):
 
 
 # Train the model
-def train(model, optimizer, criterion_MSE, criterion_Cross_middle, criterion_Cross_last , train_loader, epoch):
+def train(model, optimizer, criterion_MSE, criterino_Cross_middle, criterion_Cross_last , train_loader, epoch):
     model.train()
-    train_loss = 0
+    print_loss = 0
+    print_loss2 = 0  
     total = 0
     correct = 0
     for batch_idx, (data, target, onehot_target) in enumerate(train_loader):
         if torch.cuda.is_available():
-            data, target = Variable(data.cuda()), Variable(target.cuda()), Variable(onehot_target.cuda())
+            data, target, onehot_target = Variable(data.cuda()), Variable(target.cuda()), Variable(onehot_target.cuda())
         else:
-            data, target = Variable(data), Variable(target), Variable(onehot_target)
+            data, target, onehot_target  = Variable(data), Variable(target), Variable(onehot_target)
             
         data, target, onehot_target = setting_data(data, target, onehot_target)
         optimizer.zero_grad()
         output = model(data)
-        image_loss = criterion_MSE(output[2], target)
-        middle_loss = criterion_Cross_middle(output[1], onehot_target)
         last_loss = criterion_Cross_last(output[0], onehot_target)
-        loss.backward()
+        middle_loss = criterino_Cross_middle(output[1], onehot_target)
+        image_loss = criterion_MSE(output[2], target)
+        last_loss.backward(retain_graph=True)
+        image_loss.backward(retain_graph=True)
         optimizer.step()
-        train_loss += loss.item()
-        _, predicted = torch.max(output.data, 1)
+        print_loss += last_loss.item()
+        print_loss2 += image_loss.item()
+        _, predicted = torch.max(output[0].data, 1)
         total += target.size(0)
-        #correct += predicted.eq(target.data).sum()
+        correct += predicted.eq(onehot_target.data).sum()
         if batch_idx % 10 == 0:
-            utils.print_log('Epoch: {} | Batch: {} |  Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
-                  .format(epoch, batch_idx, train_loss / (batch_idx + 1), 100. * correct / total, correct, total))
-            print('Epoch: {} | Batch: {} |  Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
-                  .format(epoch, batch_idx, train_loss / (batch_idx + 1), 100. * correct / total, correct, total))
+            utils.print_log('Epoch: {} | Batch: {} |  Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
+                  .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2 , 100. * correct / total, correct, total))
+            print('Epoch: {} | Batch: {} |  Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
+                  .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2 , 100. * correct / total, correct, total))
             
         
-def test(model, optimizer, criterion_MSE, criterion_Cross_middle, criterion_Cross_last , train_loader, epoch):
+def test(model, criterion_MSE, criterino_Cross_middle, criterion_Cross_last , test_loader, epoch):
     model.eval()
-    test_loss = 0
-    correct = 0
+    print_loss = 0
+    print_loss2 = 0  
     total = 0
-    for batch_idx, (data, target, onehot_target) in enumerate(train_loader):
+    correct = 0
+    
+    for batch_idx, (data, target, onehot_target) in enumerate(test_loader):
         if torch.cuda.is_available():
-            data, target = Variable(data.cuda()), Variable(target.cuda()), Variable(onehot_target.cuda())
+            data, target, onehot_target = Variable(data.cuda()), Variable(target.cuda()), Variable(onehot_target.cuda())
         else:
-            data, target = Variable(data), Variable(target), Variable(onehot_target)
+            data, target, onehot_target = Variable(data), Variable(target), Variable(onehot_target)
+            
         data, target, onehot_target = setting_data(data, target, onehot_target)
-        data, target = setting_data(data, target)
         output = model(data)
-        image_loss = criterion_MSE(output[2], target)
-        middle_loss = criterion_Cross_middle(output[1], onehot_target)
         last_loss = criterion_Cross_last(output[0], onehot_target)
-        test_loss += loss.item()
-        _, predicted = torch.max(outputs.data, 1)
+        middle_loss = criterino_Cross_middle(output[1], onehot_target)
+        image_loss = criterion_MSE(output[2], target)
+        
+        print_loss += last_loss.item()
+        print_loss2 += image_loss.item()
+        _, predicted = torch.max(output[0].data, 1)
         total += target.size(0)
-        #correct += predicted.eq(target.data).sum()
-
-    max_result.append(correct)
-
-    utils.print_log('# TEST : Epoch : {} | Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{}) | Err: ({:.2f}%) | Max: ({})'
-      .format(epoch, test_loss/(batch_idx+1), 100.*correct/total, correct, total, 100-100.*correct/total, max(max_result)))
-    print('# TEST : Epoch : {} | Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{}) | Err: ({:.2f}% | Max: ({}))'
-      .format(epoch, test_loss/(batch_idx+1), 100.*correct/total, correct, total, 100-100.*correct/total, max(max_result)))
+        correct += predicted.eq(onehot_target.data).sum()
+        if batch_idx % 10 == 0:
+            utils.print_log('# TEST : Epoch: {} | Batch: {} |  Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
+                  .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2 , 100. * correct / total, correct, total))
+            print('# TEST : Epoch: {} | Batch: {} |  Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
+                  .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2 , 100. * correct / total, correct, total))
 
 
 def setting_data(data, target, onehot_target):
@@ -143,7 +147,7 @@ def setting_data(data, target, onehot_target):
     target = target.type(torch.cuda.FloatTensor)
     target = utils.renormalize_image(target)
     target = utils.normalize_function(target)
-    onehot_target = onehot_target(torch.cuda.FloatTensor)
+    onehot_target = onehot_target.type(torch.cuda.FloatTensor)
     return data, target, onehot_target
 
 
@@ -153,8 +157,7 @@ def do_learning(model_dir, number):
     main(model_dir, number)
 
 if __name__ == '__main__':
-    for i in range(20):
-        print(str(i)+'for train')	
-        model_dir = '../Deep_model/model/{}'.format(i)
-        do_learning(model_dir, i)
+    print(str(1)+'for train')   
+    model_dir = '../ResNet_Test1/model/{}'.format(1)
+    do_learning(model_dir, 1)
         

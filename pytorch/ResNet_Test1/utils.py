@@ -76,8 +76,7 @@ def normalize_image(img):
     return normalized
 
 def normalize_function(img):
-    img = (img - np.min(img)) / (np.max(img) - np.min(img))
-    img = (img - img.mean()) / math.sqrt(np.var(img))
+    img = img/255
     return img
 
 def renormalize_image(img):
