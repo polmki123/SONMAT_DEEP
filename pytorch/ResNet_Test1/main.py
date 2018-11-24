@@ -148,7 +148,7 @@ def setting_data(data, target, onehot_target):
     target = utils.renormalize_image(target)
     target = utils.normalize_function(target)
     onehot_target = onehot_target.type(torch.cuda.LongTensor)
-    onehot_target = onehot_target.squeeze_()
+    onehot_target = onehot_target.squeeze()
     return data, target, onehot_target
 
 
