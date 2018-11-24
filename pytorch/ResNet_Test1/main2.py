@@ -29,7 +29,7 @@ def main(model_dir, number):
     lr = 0.01
     start_time = time.time()
 
-    model = VGG16()
+    model = ResNet()
     
     if torch.cuda.is_available():
         # os.environ["CUDA_VISIBLE_DEVICES"] = '0'
@@ -42,9 +42,9 @@ def main(model_dir, number):
         
     # Loss and Optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
-    criterion = nn.MSELoss().cuda()
-    criterion_Cross_middle = nn.CrossEntropyLoss().cuda()
-    criterion_Cross_last = nn.BCEWithLogitsLoss().cuda()
+    criterion_MSE = nn.MSELoss().cuda()
+    #criterion_Cross_middle = nn.CrossEntropyLoss().cuda()
+    criterion_Cross_last = nn.CrossEntropyLoss().cuda()
     #criterion = nn.BCELoss().cuda()
     start_epoch = 0
     checkpoint = utils.load_checkpoint(model_dir+str(number))
@@ -66,33 +66,34 @@ def main(model_dir, number):
         for param_group in optimizer.param_groups:
             param_group['lr'] = learning_rate
     
-        train(model, optimizer, criterion, train_loader, epoch)
-        test(model, criterion, test_loader, epoch)
-
+        train(model, optimizer, criterion_MSE, criterion_Cross_middle, criterion_Cross_last , train_loader, epoch)
+        test(model, optimizer, criterion_MSE, criterion_Cross_middle, criterion_Cross_last , train_loader, epoch)
         utils.save_model_checkpoint(epoch, model, model_dir, number, optimizer)
         utils.check_model_result_image(epoch, model, number)
+        
     # utils.conv_weight_L1_printing(model.module)
     now = time.gmtime(time.time() - start_time)
     print('{} hours {} mins {} secs for training'.format(now.tm_hour, now.tm_min, now.tm_sec))
 
 
 # Train the model
-def train(model, optimizer, criterion, train_loader, epoch):
+def train(model, optimizer, criterion_MSE, criterion_Cross_middle, criterion_Cross_last , train_loader, epoch):
     model.train()
     train_loss = 0
     total = 0
     correct = 0
-    for batch_idx, (data, target) in enumerate(train_loader):
-        #print(batch_idx)
-    #for data, target in train_loader:
+    for batch_idx, (data, target, onehot_target) in enumerate(train_loader):
         if torch.cuda.is_available():
-            data, target = Variable(data.cuda()), Variable(target.cuda())
+            data, target = Variable(data.cuda()), Variable(target.cuda()), Variable(onehot_target.cuda())
         else:
-            data, target = Variable(data), Variable(target)
-        data, target = setting_data(data, target)
+            data, target = Variable(data), Variable(target), Variable(onehot_target)
+            
+        data, target, onehot_target = setting_data(data, target, onehot_target)
         optimizer.zero_grad()
         output = model(data)
-        loss = criterion(output, target)
+        image_loss = criterion_MSE(output[2], target)
+        middle_loss = criterion_Cross_middle(output[1], onehot_target)
+        last_loss = criterion_Cross_last(output[0], onehot_target)
         loss.backward()
         optimizer.step()
         train_loss += loss.item()
@@ -106,20 +107,22 @@ def train(model, optimizer, criterion, train_loader, epoch):
                   .format(epoch, batch_idx, train_loss / (batch_idx + 1), 100. * correct / total, correct, total))
             
         
-def test(model, criterion, test_loader, epoch):
+def test(model, optimizer, criterion_MSE, criterion_Cross_middle, criterion_Cross_last , train_loader, epoch):
     model.eval()
     test_loss = 0
     correct = 0
     total = 0
-    for batch_idx, (data, target) in enumerate(test_loader):
+    for batch_idx, (data, target, onehot_target) in enumerate(train_loader):
         if torch.cuda.is_available():
-            data, target = Variable(data.cuda()), Variable(target.cuda())
+            data, target = Variable(data.cuda()), Variable(target.cuda()), Variable(onehot_target.cuda())
         else:
-            data, target = Variable(data), Variable(target)
+            data, target = Variable(data), Variable(target), Variable(onehot_target)
+        data, target, onehot_target = setting_data(data, target, onehot_target)
         data, target = setting_data(data, target)
-        outputs = model(data)
-        loss = criterion(outputs, target)
-
+        output = model(data)
+        image_loss = criterion_MSE(output[2], target)
+        middle_loss = criterion_Cross_middle(output[1], onehot_target)
+        last_loss = criterion_Cross_last(output[0], onehot_target)
         test_loss += loss.item()
         _, predicted = torch.max(outputs.data, 1)
         total += target.size(0)
@@ -133,14 +136,15 @@ def test(model, criterion, test_loader, epoch):
       .format(epoch, test_loss/(batch_idx+1), 100.*correct/total, correct, total, 100-100.*correct/total, max(max_result)))
 
 
-def setting_data(data, target):
+def setting_data(data, target, onehot_target):
     data = data.type(torch.cuda.FloatTensor)
     data = utils.renormalize_image(data)
     data = utils.normalize_function(data)
     target = target.type(torch.cuda.FloatTensor)
     target = utils.renormalize_image(target)
     target = utils.normalize_function(target)
-    return data, target
+    onehot_target = onehot_target(torch.cuda.FloatTensor)
+    return data, target, onehot_target
 
 
 def do_learning(model_dir, number):
