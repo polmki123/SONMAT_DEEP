@@ -55,7 +55,7 @@ def check_model_result_image(epoch, model, number):
             input = Variable(input.cuda())
             input = input.type(torch.cuda.FloatTensor)
             output = model(input)
-            output = Variable(output).data.cpu().numpy()
+            output = Variable(output[1]).data.cpu().numpy()
             output = output.reshape(64, 64)
             # print(output)
             output = (output) * 255
