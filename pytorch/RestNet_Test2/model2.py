@@ -69,7 +69,6 @@ class DeBlock(nn.Module):
             )
 
     def forward(self, x):
-        residual = x
         out = self.dconv1(x)
         out = self.bn1(out)
         out = self.relu(out)
@@ -77,8 +76,7 @@ class DeBlock(nn.Module):
         out = self.conv2(out)
         out = self.bn2(out)
 
-        if self.downsample is not None:
-            residual = self.downsample(x)
+        residual = self.downsample(x)
 
         out += residual
         out = self.relu(out)
