@@ -10,6 +10,7 @@ import scipy.misc as misc
 import numpy as np
 import io
 import gzip
+ 
 def pad_seq(seq, batch_size):
     # pad the sequence to be the multiples of batch_size
     seq_len = len(seq)
