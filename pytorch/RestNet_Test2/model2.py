@@ -51,6 +51,39 @@ class BasicBlock(nn.Module):
         out = self.relu(out)
         return out
 
+class DeBlock(nn.Module):
+
+    def __init__(self, in_channels, out_channels, stride, downsample=None):
+        super(BasicBlock, self).__init__()
+        self.dconv1 = ConvTranspose2d(in_channels, out_channels, kernel_size = 2, stride = stride, padding = 0, bias=False),
+        self.bn1 = nn.BatchNorm2d(out_channels) #
+        self.relu = nn.ReLU(True)
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False)
+        self.bn2 = nn.BatchNorm2d(out_channels)
+        self.downsample = downsample
+        
+        if downsample is not None:
+            self.downsample = nn.Sequential(
+                nn.ConvTranspose2d(in_channels, out_channels, kernel_size = 2, stride = stride, padding = 0, bias=False), #avgPooling?
+                nn.BatchNorm2d(out_channels)
+            )
+
+    def forward(self, x):
+        residual = x
+        out = self.dconv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+
+        out = self.conv2(out)
+        out = self.bn2(out)
+
+        if self.downsample is not None:
+            residual = self.downsample(x)
+
+        out += residual
+        out = self.relu(out)
+        return out
+
 class ResNet(nn.Module):
     def __init__(self, num_classes=2350, resnet_layer=56):
         super(ResNet, self).__init__()
@@ -58,7 +91,7 @@ class ResNet(nn.Module):
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
 
-        self.n = 9
+        self.n = 4
 
         # 64 32 32
         self.layer1 = nn.Sequential()
@@ -79,11 +112,41 @@ class ResNet(nn.Module):
             self.layer3.add_module('layer3_%d' % (i), BasicBlock(in_channels=256, out_channels=256, stride=1, downsample=None))
 
         # 256 8 8
+        self.layer4 = nn.Sequential()
+        self.layer4.add_module('layer4_0', BasicBlock(in_channels=256, out_channels=512, stride=2, downsample=True))
+        for i in range(1,self.n):
+            self.layer4.add_module('layer4_%d' % (i), BasicBlock(in_channels=512, out_channels=512, stride=1, downsample=None))
+        # 512 4 4
 
-        self.MSEavgpool = nn.AvgPool2d(kernel_size=2, stride=1)
+        self.Dlayer1 = nn.Sequential()
+        self.Dlayer1.add_module('layer5_0', DeBlock(in_channels=512, out_channels=128, stride=2, downsample=True))
+        for i in range(1,self.n):
+            self.Dlayer1.add_module('layer5_%d' % (i), BasicBlock(in_channels=128, out_channels=128, stride=1, downsample=None))
+        # 128 8 8
 
-        self.Class_avgpool = nn.AvgPool2d(kernel_size=8, stride=1)
-        self.fc = nn.Linear(256, num_classes)
+
+        self.Dlayer2 = nn.Sequential()
+        self.Dlayer2.add_module('layer6_0', DeBlock(in_channels=128, out_channels=32, stride=2, downsample=True))
+        for i in range(1,self.n):
+            self.Dlayer2.add_module('layer6_%d' % (i), BasicBlock(in_channels=32, out_channels=32, stride=1, downsample=None))
+        # 32 16 16
+
+        self.Dlayer3 = nn.Sequential()
+        self.Dlayer3.add_module('layer7_0', DeBlock(in_channels=32, out_channels=8, stride=2, downsample=True))
+        for i in range(1,self.n):
+            self.Dlayer3.add_module('layer7_%d' % (i), BasicBlock(in_channels=8, out_channels=8, stride=1, downsample=None))
+        # 8 32 32
+
+        self.Dlayer4 = nn.Sequential()
+        self.Dlayer4.add_module('layer8_0', DeBlock(in_channels=8, out_channels=8, stride=2, downsample=True)) # 8 64 64
+        self.Dlayer4.add_module('layer8_1', nn.Conv2d(8, 1, kernel_size=1, stride=1, padding=0, bias=False))
+        # 1 64 64
+
+        self.Class_avgpool_middle = nn.AvgPool2d(kernel_size=4, stride=1)
+        self.fc_middle = nn.Linear(512, num_classes)
+
+        self.Class_avgpool_final = nn.AvgPool2d(kernel_size=2, stride=2)
+        self.fc_final = nn.Linear(1024, num_classes)
 
 
     def forward(self, x):
@@ -93,143 +156,19 @@ class ResNet(nn.Module):
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
+        x = self.layer4(x)
 
-        MSE_out = self.MSEavgpool(x)
-        MSE_out = MSE_out.view(MSE_out.size(0), 1, 64, 64)
+        middle = self.Class_avgpool_middle(x)
+        middle = middle.view(middle.size(0), -1)
+        middle = self.fc_middle(middle)
 
-        x = self.Class_avgpool(x)
-        x = x.view(x.size(0), -1)
-        x = self.fc(x)
+        x = self.Dlayer1(x)
+        x = self.Dlayer2(x)
+        x = self.Dlayer3(x)
+        x = self.Dlayer4(x)
 
-        return [x, MSE_out]
+        final = self.Class_avgpool_final(x)
+        final = final.view(final.size(0), -1)
+        final = self.fc_final(final)
 
-
-        
-import torch
-import torch.nn as nn
-from torch.autograd import Variable
-
-class VGG16(nn.Module):
-    def __init__(self):
-        super(VGG16, self).__init__()
-        self.layer1 = nn.Sequential(
-            
-            # 1-1 conv layer
-            # batch_size * 3*64*64
-            nn.Conv2d(9, 64, kernel_size=3, padding=1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(),
-            
-            # 1-2 conv layer
-            # batch_size * 64*64*64
-            nn.Conv2d(64, 64, kernel_size=3, padding=1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(),
-            
-            # 1 Pooling layer
-            # batch_size * 64*64*64
-            nn.MaxPool2d(kernel_size=2, stride=2))
-        
-        self.layer2 = nn.Sequential(
-            
-            # 2-1 conv layer
-            # batch_size * 64*32*32
-            nn.Conv2d(64, 128, kernel_size=3, padding=1),
-            nn.BatchNorm2d(128),
-            nn.ReLU(),
-            
-            # 2-2 conv layer
-            # batch_size * 128*32*32
-            nn.Conv2d(128, 128, kernel_size=3, padding=1),
-            nn.BatchNorm2d(128),
-            nn.ReLU(),
-            
-            # 2 Pooling lyaer
-            # batch_size * 128*32*32
-            nn.MaxPool2d(kernel_size=2, stride=2))
-        
-        self.layer3 = nn.Sequential(
-            
-            # 3-1 conv layer
-            # batch_size * 128*16*16
-            nn.Conv2d(128, 256, kernel_size=3, padding=1),
-            nn.BatchNorm2d(256),
-            nn.ReLU(),
-            
-            # 3-2 conv layer
-            # batch_size * 256*16*16
-            nn.Conv2d(256, 256, kernel_size=3, padding=1),
-            nn.BatchNorm2d(256),
-            nn.ReLU(),
-            
-            # 3 Pooling layer
-            # batch_size * 256*16*16
-            nn.MaxPool2d(kernel_size=2, stride=2))
-        
-        self.layer4 = nn.Sequential(
-            
-            # 4-1 conv layer
-            # batch_size * 512*8*8
-            nn.Conv2d(256, 512, kernel_size=3, padding=1),
-            nn.BatchNorm2d(512),
-            nn.ReLU(),
-            
-            # 4-2 conv layer
-            # batch_size * 512*8*8
-            nn.Conv2d(512, 512, kernel_size=3, padding=1),
-            nn.BatchNorm2d(512),
-            nn.ReLU(),
-            
-            # 4 Pooling layer
-            # batch_size * 512*8*8
-            nn.MaxPool2d(kernel_size=2, stride=2))
-        
-        self.layer5 = nn.Sequential(
-            
-            # 5-1 conv layer
-            # batch_size * 512*4*4
-            nn.Conv2d(512, 512, kernel_size=3, padding=1),
-            nn.BatchNorm2d(512),
-            nn.ReLU(),
-            
-            # 5-2 conv layer
-            # batch_size * 512*4*4
-            nn.Conv2d(512, 256, kernel_size=3, padding=1),
-            nn.BatchNorm2d(256),
-            nn.ReLU())
-        
-        self.layer6 = nn.Sequential(
-            
-            # 6 Transpose
-            # batch_size * 256*4*4
-            nn.ConvTranspose2d(256, 64, kernel_size = 4, stride = 4, padding = 0),
-            nn.BatchNorm2d(64),
-            nn.ReLU())
-        
-        self.layer7 = nn.Sequential(
-            
-            # 7 Transpose
-            # batch_size * 64*16*16
-            nn.ConvTranspose2d(64, 16, kernel_size=4, stride=2, padding=1),
-            nn.BatchNorm2d(16),
-            nn.ReLU())
-        
-        self.layer8 = nn.Sequential(
-            
-            # 8 Transpose
-            # batch_size * 16*32*32
-            nn.ConvTranspose2d(16, 1, kernel_size=4, stride=2, padding=1),
-            nn.Tanh())
-            # batch_size * 1*64*64
-        
-    def forward(self, x):
-        out = self.layer1(x)
-        out = self.layer2(out)
-        out = self.layer3(out)
-        out = self.layer4(out)
-        out = self.layer5(out)
-        out = self.layer6(out)
-        out = self.layer7(out)
-        out = self.layer8(out)
-            
-        return out
+        return [x, middle, final] # MSE, 
