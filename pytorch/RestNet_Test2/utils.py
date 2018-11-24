@@ -121,7 +121,9 @@ def print_log(text, filename="log.txt"):
 
 def make_one_hot() :
     a = np.array([a for a in range(2350)])
-    return a
+    b = np.zeros((2350,2350))
+    b[np.arange(2350), a] = 1
+    return b
 
 
 def Package_Data_onehot_Slice_Loder(number):

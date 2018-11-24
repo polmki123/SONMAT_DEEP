@@ -90,6 +90,8 @@ def train(model, optimizer, criterion_MSE, criterion_Cross_last , train_loader, 
         data, target, onehot_target = setting_data(data, target, onehot_target)
         optimizer.zero_grad()
         output = model(data)
+        print(onehot_target.shape)
+        print(output[0].shape)
         last_loss = criterion_Cross_last(output[0], onehot_target)
         image_loss = criterion_MSE(output[1], target)
         last_loss.backward(retain_graph=True)
@@ -121,7 +123,9 @@ def test(model, criterion_MSE, criterion_Cross_last , test_loader, epoch):
             
         data, target, onehot_target = setting_data(data, target, onehot_target)
         output = model(data)
-        last_loss = criterion_Cross_last(output[0], onehot_target)
+        print(onehot_target.shape)
+        print(torch.max(onehot_target, 1)[1].shape)
+        last_loss = criterion_Cross_last(output[0], torch.max(onehot_target, 1)[1])
         image_loss = criterion_MSE(output[1], target)
         
         print_loss += last_loss.item()
@@ -143,8 +147,8 @@ def setting_data(data, target, onehot_target):
     target = target.type(torch.cuda.FloatTensor)
     target = utils.renormalize_image(target)
     target = utils.normalize_function(target)
-    onehot_target = onehot_target.squeeze(1)
     onehot_target = onehot_target.type(torch.cuda.LongTensor)
+    onehot_target = torch.squeeze(onehot_target)
     return data, target, onehot_target
 
 
