@@ -126,69 +126,6 @@ def make_one_hot() :
     b[np.arange(2350), a] = 1
     return b
 
-def Package_Data_Slice_Loder(number):
-    #read train data
-    numpy_x = list()
-    numpy_label = list()
-    numpy_onehot = list()
-    with gzip.open('../Deep_model/Conpress/train_' + str(number) +'.pkl', "rb") as of:
-        while True:
-            try:
-                e = pickle.load(of)
-                numpy_x.extend(e[0])
-                numpy_label.extend(e[1])
-                numpy_onehot.append(make_one_hot())
-                if len(numpy_x) % 1000 == 0:
-                	print("processed %d examples" % len(numpy_x))
-            except EOFError:
-                print('error')
-                break
-            except Exception:
-                print('error')
-                pass
-        print("unpickled total %d examples" % len(numpy_x))
-
-    X_datas = np.array(numpy_x)
-    print(X_datas.shape)
-    label_datas = np.array(numpy_label)
-    print(label_datas.shape)
-    onehot_datas = np.array(numpy_onehot)
-    print(onehot_datas.shape)
-    
-    #read test data
-    numpy_test = list()
-    numpy_label_test = list()
-    numpy_onehot_test = list()
-    with gzip.open('../Deep_model/Conpress/test_' + str(number) + '.pkl', "rb") as of:
-        while True:
-            try:
-                e = pickle.load(of)
-                numpy_test.extend(e[0])
-                numpy_label_test.extend(e[1])
-                numpy_onehot_test.append(make_one_hot())
-                if len(numpy_test) % 1000 == 0:
-                    print("processed %d examples" % len(numpy_test))
-            except EOFError:
-                print('error')
-                break
-            except Exception:
-                print('error')
-                pass
-        print("unpickled total %d examples" % len(numpy_test))
-        
-    X_test_datas = np.array(numpy_test)
-    print(X_test_datas.shape)
-    test_label_datas = np.array(numpy_label_test)
-    print(test_label_datas.shape)
-    onehot_test_datas = np.array(numpy_onehot_test)
-    print(onehot_test_datas.shape)
-
-    #setting data, test set
-    train_dataset = torch.utils.data.TensorDataset(torch.from_numpy(X_datas), torch.from_numpy(label_datas))
-    test_dataset = torch.utils.data.TensorDataset(torch.from_numpy(X_test_datas),torch.from_numpy(test_label_datas))
-
-    return train_dataset, test_dataset
-
 
 def Package_Data_onehot_Slice_Loder(number):
     # read train data
