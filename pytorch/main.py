@@ -1,5 +1,5 @@
 import torch
-import torch.nn as tnn
+import torch.nn as nn
 import torch.backends.cudnn as cudnn
 import torchvision.transforms as transforms
 from torch.autograd import Variable
@@ -34,7 +34,7 @@ def main(model_dir, number):
     if torch.cuda.is_available():
         # os.environ["CUDA_VISIBLE_DEVICES"] = '0'
         print("USE", torch.cuda.device_count(), "GPUs!")
-        model = tnn.DataParallel(model).cuda()
+        model = nn.DataParallel(model).cuda()
         cudnn.benchmark = True
 
     else:
@@ -42,10 +42,10 @@ def main(model_dir, number):
         
     # Loss and Optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
-    criterion = tnn.MSELoss().cuda()
-    #criterion = tnn.CrossEntropyLoss().cuda()
-    #criterion = tnn.BCEWithLogitsLoss().cuda()
-    #criterion = tnn.BCELoss().cuda()
+    criterion = nn.MSELoss().cuda()
+    criterion_Cross_middle = nn.CrossEntropyLoss().cuda()
+    criterion_Cross_last = nn.BCEWithLogitsLoss().cuda()
+    #criterion = nn.BCELoss().cuda()
     start_epoch = 0
     checkpoint = utils.load_checkpoint(model_dir+str(number))
 
@@ -68,40 +68,9 @@ def main(model_dir, number):
     
         train(model, optimizer, criterion, train_loader, epoch)
         test(model, criterion, test_loader, epoch)
-        
-        if epoch % 20 == 0:
-            model_filename = '/checkpoint_%02d.pth.tar' % epoch
-            utils.save_checkpoint({
-                'epoch': epoch,
-                'model': model,
-                'state_dict': model.state_dict(),
-                'optimizer': optimizer.state_dict(),
-            }, model_filename, model_dir+str(number+1))
-        if epoch % 10 == 0:
-            saveimagedir = '../Deep_model/save_font_image/' + str(number) + '/' + str(epoch) + '/'
-            inputimagedir = '../Deep_model/test1.jpg'
-            input_data = input_Deepmodel_image(inputimagedir)
-            model.eval()
-            check_point = 0
-            for i in input_data:
-                check_point = check_point + 1
-                i = np.array(i)
-                i = i.reshape(1,9,64,64)
-                input = torch.from_numpy(i)
-                input = normalize_function(input)
-                input = Variable(input.cuda())
-                input = input.type(torch.cuda.FloatTensor)
-                output = model(input)
-                output = Variable(output).data.cpu().numpy()
-                output = output.reshape(64,64)
-                #print(output)
-                output = (output)*255
-                img = Image.fromarray(output.astype('uint8'), 'L')
-                #img = PIL.ImageOps.invert(img)
-                if not os.path.exists(saveimagedir):
-                    os.makedirs(saveimagedir)
-                img.save(saveimagedir + str(check_point) + 'my.jpg')
-       
+
+        utils.save_model_checkpoint(epoch, model, model_dir, number, optimizer)
+        utils.check_model_result_image(epoch, model, number)
     # utils.conv_weight_L1_printing(model.module)
     now = time.gmtime(time.time() - start_time)
     print('{} hours {} mins {} secs for training'.format(now.tm_hour, now.tm_min, now.tm_sec))
@@ -120,12 +89,7 @@ def train(model, optimizer, criterion, train_loader, epoch):
             data, target = Variable(data.cuda()), Variable(target.cuda())
         else:
             data, target = Variable(data), Variable(target)
-        data = data.type(torch.cuda.FloatTensor)
-        data = renormalize_image(data)
-        data = normalize_function(data)
-        target = target.type(torch.cuda.FloatTensor)
-        target = renormalize_image(target)
-        target = normalize_function(target)
+        data, target = setting_data(data, target)
         optimizer.zero_grad()
         output = model(data)
         loss = criterion(output, target)
@@ -152,12 +116,7 @@ def test(model, criterion, test_loader, epoch):
             data, target = Variable(data.cuda()), Variable(target.cuda())
         else:
             data, target = Variable(data), Variable(target)
-        data = data.type(torch.cuda.FloatTensor)
-        data = renormalize_image(data)
-        data = normalize_function(data)
-        target = target.type(torch.cuda.FloatTensor)
-        target = renormalize_image(target)
-        target = normalize_function(target)
+        data, target = setting_data(data, target)
         outputs = model(data)
         loss = criterion(outputs, target)
 
@@ -174,36 +133,15 @@ def test(model, criterion, test_loader, epoch):
       .format(epoch, test_loss/(batch_idx+1), 100.*correct/total, correct, total, 100-100.*correct/total, max(max_result)))
 
 
+def setting_data(data, target):
+    data = data.type(torch.cuda.FloatTensor)
+    data = utils.renormalize_image(data)
+    data = utils.normalize_function(data)
+    target = target.type(torch.cuda.FloatTensor)
+    target = utils.renormalize_image(target)
+    target = utils.normalize_function(target)
+    return data, target
 
-def normalize_image(img):
-    """
-    Make image zero centered and in between (-1, 1)
-    """
-    normalized = (img / 127.5) - 1.
-    return normalized
-
-def renormalize_image(img):
-    renormalized = (img + 1) * 127.5
-    return renormalized
-
-def normalize_function(img):
-    img = (img - img.min()) / (img.max() - img.min())
-    #img = (img - img.mean()) / (img.std())
-    return img
-
-def input_Deepmodel_image(inputimagedir) :
-    frame_dir = '../Deep_model/frame_label/'
-    frame_paths = glob.glob(os.path.join(frame_dir, '*.jpg'))
-    input_data = list()
-    for frame in frame_paths :
-        frame_image = np.array(Image.open(frame)).reshape(1,64,64)
-        input_image = np.array(Image.open(inputimagedir))
-        input_image = np.array(np.split(input_image, 8, axis=1))  # 8*64*64
-        Concat_data = np.append(input_image, frame_image, axis=0)
-        if ((9, 64, 64) == Concat_data.shape):
-            input_data.append(Concat_data)
-            
-    return input_data
 
 def do_learning(model_dir, number):
     global max_result

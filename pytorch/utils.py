@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from torchvision import datasets, transforms
+from torch.autograd import Variable
 from PIL import Image
 import os
 import numpy as np
@@ -11,6 +12,58 @@ import random
 import math
 default_model_dir = "./"
 
+def save_model_checkpoint(epoch, model, model_dir, number, optimizer):
+    if epoch % 20 == 0:
+        model_filename = '/checkpoint_%02d.pth.tar' % epoch
+        save_checkpoint({
+            'epoch': epoch,
+            'model': model,
+            'state_dict': model.state_dict(),
+            'optimizer': optimizer.state_dict(),
+        }, model_filename, model_dir + str(number + 1))
+
+
+def input_Deepmodel_image(inputimagedir):
+    frame_dir = '../Deep_model/frame_label/'
+    frame_paths = glob.glob(os.path.join(frame_dir, '*.jpg'))
+    input_data = list()
+    for frame in frame_paths:
+        frame_image = np.array(Image.open(frame)).reshape(1, 64, 64)
+        input_image = np.array(Image.open(inputimagedir))
+        input_image = np.array(np.split(input_image, 8, axis=1))  # 8*64*64
+        Concat_data = np.append(input_image, frame_image, axis=0)
+        if ((9, 64, 64) == Concat_data.shape):
+            input_data.append(Concat_data)
+    
+    return input_data
+
+
+def check_model_result_image(epoch, model, number):
+    if epoch % 10 == 0:
+        saveimagedir = '../pytorch/save_font_image/' + str(number) + '/' + str(epoch) + '/'
+        inputimagedir = '../Deep_model/test1.jpg'
+        input_data = input_Deepmodel_image(inputimagedir)
+        model.eval()
+        check_point = 0
+        for i in input_data:
+            check_point = check_point + 1
+            i = np.array(i)
+            i = i.reshape(1, 9, 64, 64)
+            input = torch.from_numpy(i)
+            input = normalize_function(input)
+            input = Variable(input.cuda())
+            input = input.type(torch.cuda.FloatTensor)
+            output = model(input)
+            output = Variable(output).data.cpu().numpy()
+            output = output.reshape(64, 64)
+            # print(output)
+            output = (output) * 255
+            img = Image.fromarray(output.astype('uint8'), 'L')
+            # img = PIL.ImageOps.invert(img)
+            if not os.path.exists(saveimagedir):
+                os.makedirs(saveimagedir)
+            img.save(saveimagedir + str(check_point) + 'my.jpg')
+            
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
 
