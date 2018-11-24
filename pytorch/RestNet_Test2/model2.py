@@ -62,11 +62,10 @@ class DeBlock(nn.Module):
         self.bn2 = nn.BatchNorm2d(out_channels)
         self.downsample = downsample
         
-        if downsample is not None:
-            self.downsample = nn.Sequential(
-                nn.ConvTranspose2d(in_channels, out_channels, kernel_size = 2, stride = stride, padding = 0, bias=False), #avgPooling?
-                nn.BatchNorm2d(out_channels)
-            )
+        self.downsample = nn.Sequential(
+            nn.ConvTranspose2d(in_channels, out_channels, kernel_size = 2, stride = stride, padding = 0, bias=False), #avgPooling?
+            nn.BatchNorm2d(out_channels)
+        )
 
     def forward(self, x):
         out = self.dconv1(x)
@@ -96,20 +95,20 @@ class ResNet(nn.Module):
         self.layer1.add_module('layer1_0', BasicBlock(in_channels=64, out_channels=64, stride=1, downsample=None))
         for i in range(1,self.n):
             self.layer1.add_module('layer1_%d' % (i), BasicBlock(in_channels=64, out_channels=64, stride=1, downsample=None))
-
         # 64 32 32
+
         self.layer2 = nn.Sequential()
         self.layer2.add_module('layer2_0', BasicBlock(in_channels=64, out_channels=128, stride=2, downsample=True))
         for i in range(1,self.n):
             self.layer2.add_module('layer2_%d' % (i), BasicBlock(in_channels=128, out_channels=128, stride=1, downsample=None))
-
         # 128 16 16
+
         self.layer3 = nn.Sequential()
         self.layer3.add_module('layer3_0', BasicBlock(in_channels=128, out_channels=256, stride=2, downsample=True))
         for i in range(1,self.n):
             self.layer3.add_module('layer3_%d' % (i), BasicBlock(in_channels=256, out_channels=256, stride=1, downsample=None))
-
         # 256 8 8
+        
         self.layer4 = nn.Sequential()
         self.layer4.add_module('layer4_0', BasicBlock(in_channels=256, out_channels=512, stride=2, downsample=True))
         for i in range(1,self.n):
