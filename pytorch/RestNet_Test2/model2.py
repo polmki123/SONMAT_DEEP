@@ -145,7 +145,8 @@ class ResNet(nn.Module):
         self.Class_avgpool_final = nn.AvgPool2d(kernel_size=2, stride=2)
         self.fc_final = nn.Linear(1024, num_classes)
 
-
+        self.sigmoid = nn.Sigmoid()
+        
     def forward(self, x):
 
         x = self.relu(self.bn1(self.conv1(x)))
@@ -167,5 +168,7 @@ class ResNet(nn.Module):
         final = self.Class_avgpool_final(x)
         final = final.view(final.size(0), -1)
         final = self.fc_final(final)
+
+        x = self.sigmoid(x)
 
         return [x, middle, final] # MSE, 
