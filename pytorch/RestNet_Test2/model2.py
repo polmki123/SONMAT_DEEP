@@ -85,8 +85,9 @@ class ResNet(nn.Module):
     def __init__(self, num_classes=2350, resnet_layer=56):
         super(ResNet, self).__init__()
         self.conv1 = nn.Conv2d(9, 64, kernel_size=3, stride=2, padding=1, bias=False)
+        self.conv2 = nn.Conv2d(64,64, kernel_size=3, padding =1)
         self.bn1 = nn.BatchNorm2d(64)
-        self.relu = nn.ReLU(True)
+        # self.relu = nn.ReLU(True)
         self.Tanh = nn.Tanh()
         self.n = 4
 
@@ -167,6 +168,7 @@ class ResNet(nn.Module):
         final = final.view(final.size(0), -1)
         final = self.fc_final(final)
 
+        x = self.conv2d(x)
         x = self.Tanh(x)
 
         return [x, middle, final] # MSE, 
