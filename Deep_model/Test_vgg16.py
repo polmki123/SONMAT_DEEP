@@ -99,7 +99,7 @@ class VGG16(tnn.Module):
             # 5-2 conv layer
             # batch_size * 512*4*4
             tnn.Conv2d(512, 256, kernel_size=3, padding=1),
-            tnn.BatchNorm2d(256),
+            tnn.BatchNorm2d(256),   
             tnn.ReLU())
             
             # 5 Pooling layer

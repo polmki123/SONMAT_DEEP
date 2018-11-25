@@ -57,8 +57,9 @@ class ResNet(nn.Module):
         self.conv1 = nn.Conv2d(9, 64, kernel_size=3, stride=2, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
-        self.Leaky = nn.LeakyReLu()
+        self.Leaky = nn.LeakyReLU()
         self.sigmoid = nn.Sigmoid()
+        self.Tanh = nn.Tanh()
         self.n = 9
         # 64 32 32
         self.layer1 = nn.Sequential()
@@ -81,8 +82,7 @@ class ResNet(nn.Module):
         # 256 8 8
 
         self.MSEavgpool = nn.AvgPool2d(kernel_size=2, stride=2)
-        # self.Tanh = nn.Tanh()
-
+        
 
         self.Class_avgpool = nn.AvgPool2d(kernel_size=8, stride=1)
         self.fc = nn.Linear(256, num_classes)
@@ -98,7 +98,7 @@ class ResNet(nn.Module):
 
         MSE_out = self.MSEavgpool(x) #256*4*4
         MSE_out = MSE_out.view(MSE_out.size(0), 1, 64, 64)
-        MSE_out = self.Tanh(MSE_out)
+        MSE_out = self.Leaky(MSE_out)
 
 
         x = self.Class_avgpool(x)

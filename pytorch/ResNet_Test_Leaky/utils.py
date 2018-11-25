@@ -10,7 +10,7 @@ import pickle
 import gzip
 import random
 import math
-
+import PIL.ImageOps
 default_model_dir = "./"
 
 def save_model_checkpoint(epoch, model, model_dir, number, optimizer):
@@ -25,7 +25,7 @@ def save_model_checkpoint(epoch, model, model_dir, number, optimizer):
 
 
 def input_Deepmodel_image(inputimagedir):
-    frame_dir = '../../../hhjung/Conpress_Son/frame_label/'
+    frame_dir = '../Deep_model/frame_label/'
     frame_paths = glob.glob(os.path.join(frame_dir, '*.jpg'))
     input_data = list()
     for frame in frame_paths:
@@ -41,8 +41,8 @@ def input_Deepmodel_image(inputimagedir):
 
 def check_model_result_image(epoch, model, number):
     if epoch % 10 == 0:
-        saveimagedir = '../ResNet_Test2/save_font_image/' + str(number) + '/' + str(epoch) + '/'
-        inputimagedir = '../ResNet_Test2/test1.jpg'
+        saveimagedir = '../ResNet_Test_Leaky/save_font_image/' + str(number) + '/' + str(epoch) + '/'
+        inputimagedir = '../Deep_model/test1.jpg'
         input_data = input_Deepmodel_image(inputimagedir)
         model.eval()
         check_point = 0
@@ -51,16 +51,16 @@ def check_model_result_image(epoch, model, number):
             i = np.array(i)
             i = i.reshape(1, 9, 64, 64)
             input = torch.from_numpy(i)
-            input = normalize_function(input)
             input = Variable(input.cuda())
             input = input.type(torch.cuda.FloatTensor)
+            input = normalize_image(input)
             output = model(input)
-            output = Variable(output[0]).data.cpu().numpy()
+            output = Variable(output[1]).data.cpu().numpy()
             output = output.reshape(64, 64)
             # print(output)
-            output = (output) * 255
+            output = (output)*255
             img = Image.fromarray(output.astype('uint8'), 'L')
-            # img = PIL.ImageOps.invert(img)
+            #img = PIL.ImageOps.invert(img)
             if not os.path.exists(saveimagedir):
                 os.makedirs(saveimagedir)
             img.save(saveimagedir + str(check_point) + 'my.jpg')
@@ -76,7 +76,8 @@ def normalize_image(img):
     return normalized
 
 def normalize_function(img):
-    img = img/255
+    img = (img - img.min()) / (img.max() - img.min())
+    # img = (img - img.mean()) / (img.std())
     return img
 
 def renormalize_image(img):
@@ -122,18 +123,16 @@ def print_log(text, filename="log.txt"):
 def make_one_hot() :
     a = np.array([a for a in range(2350)])
     return a
- 
+
 
 def Package_Data_onehot_Slice_Loder(number):
     # read train data
     numpy_x = list()
     numpy_label = list()
     numpy_onehot = list()
-    load_check = 0
-    with gzip.open('../../../hhjung/Conpress_Son/train_' + str(number) + '.pkl', "rb") as of:
-        while load_check < 31:
+    with gzip.open('../Deep_model/Conpress/train_' + str(number) + '.pkl', "rb") as of:
+        while True:
             try:
-                load_check = load_check + 1
                 e = pickle.load(of)
                 numpy_x.extend(e[0])
                 numpy_label.extend(e[1])
@@ -159,11 +158,9 @@ def Package_Data_onehot_Slice_Loder(number):
     numpy_test = list()
     numpy_label_test = list()
     numpy_onehot_test = list()
-    load_check = 0
-    with gzip.open('../../../hhjung/Conpress_Son/test_' + str(number) + '.pkl', "rb") as of:
-        while load_check < 6 :
+    with gzip.open('../Deep_model/Conpress/test_' + str(number) + '.pkl', "rb") as of:
+        while True:
             try:
-                load_check = load_check + 1
                 e = pickle.load(of)
                 numpy_test.extend(e[0])
                 numpy_label_test.extend(e[1])

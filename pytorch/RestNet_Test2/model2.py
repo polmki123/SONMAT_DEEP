@@ -55,7 +55,7 @@ class DeBlock(nn.Module):
 
     def __init__(self, in_channels, out_channels, stride, downsample=None):
         super(DeBlock, self).__init__()
-        self.dconv1 = nn.ConvTranspose2d(in_channels, out_channels, kernel_size = 2, stride = stride, padding = 0, bias=False),
+        self.dconv1 = nn.ConvTranspose2d(in_channels, out_channels, kernel_size = 2, stride = stride, padding = 0, bias=False)
         self.bn1 = nn.BatchNorm2d(out_channels) #
         self.relu = nn.ReLU(True)
         self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False)
@@ -86,8 +86,8 @@ class ResNet(nn.Module):
         super(ResNet, self).__init__()
         self.conv1 = nn.Conv2d(9, 64, kernel_size=3, stride=2, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
-        self.relu = nn.ReLU(inplace=True)
-
+        self.relu = nn.ReLU(True)
+        self.relu2 = nn.ReLU()
         self.n = 4
 
         # 64 32 32
@@ -147,10 +147,8 @@ class ResNet(nn.Module):
 
         #self.relu = nn.relu()
         
-    def forward(self, x):
-
+    def forward(self, x):	
         x = self.relu(self.bn1(self.conv1(x)))
-
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
@@ -169,6 +167,6 @@ class ResNet(nn.Module):
         final = final.view(final.size(0), -1)
         final = self.fc_final(final)
 
-        x = self.relu(x)
+        x = self.relu2(x)
 
         return [x, middle, final] # MSE, 
