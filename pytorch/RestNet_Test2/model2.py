@@ -54,8 +54,8 @@ class BasicBlock(nn.Module):
 class DeBlock(nn.Module):
 
     def __init__(self, in_channels, out_channels, stride, downsample=None):
-        super(BasicBlock, self).__init__()
-        self.dconv1 = ConvTranspose2d(in_channels, out_channels, kernel_size = 2, stride = stride, padding = 0, bias=False),
+        super(DeBlock, self).__init__()
+        self.dconv1 = nn.ConvTranspose2d(in_channels, out_channels, kernel_size = 2, stride = stride, padding = 0, bias=False),
         self.bn1 = nn.BatchNorm2d(out_channels) #
         self.relu = nn.ReLU(True)
         self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False)
