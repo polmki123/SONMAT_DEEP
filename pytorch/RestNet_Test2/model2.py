@@ -168,7 +168,7 @@ class ResNet(nn.Module):
         final = final.view(final.size(0), -1)
         final = self.fc_final(final)
 
-        x = self.conv2d(x)
+        x = self.conv2(x)
         x = self.Tanh(x)
 
         return [x, middle, final] # MSE, 
