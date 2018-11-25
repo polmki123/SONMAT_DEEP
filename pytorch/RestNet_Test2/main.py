@@ -13,12 +13,12 @@ import numpy as np
 import PIL.ImageOps
 from model2 import *
 
-os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+os.environ["CUDA_VISIBLE_DEVICES"] = '6'
 
 def main(model_dir, number):
     utils.default_model_dir = model_dir
     BATCH_SIZE = 128
-    lr = 0.01
+    lr = 0.0002
     EPOCH = 200 
     start_epoch = 0
     train_Data, test_Data = utils.Package_Data_onehot_Slice_Loder(number+1)
@@ -179,6 +179,6 @@ def do_learning(model_dir, number):
 
 if __name__ == '__main__':
     print(str(1)+'for train')   
-    model_dir = '../ResNet_Test1/model/{}'.format(1)
+    model_dir = '../ResNet_Test2/model/{}'.format(1)
     do_learning(model_dir, 1)
         

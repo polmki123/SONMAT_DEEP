@@ -25,7 +25,7 @@ def save_model_checkpoint(epoch, model, model_dir, number, optimizer):
 
 
 def input_Deepmodel_image(inputimagedir):
-    frame_dir = '../Deep_model/frame_label/'
+    frame_dir = '../../../hhjung/Conpress_Son/frame_label/'
     frame_paths = glob.glob(os.path.join(frame_dir, '*.jpg'))
     input_data = list()
     for frame in frame_paths:
@@ -41,8 +41,8 @@ def input_Deepmodel_image(inputimagedir):
 
 def check_model_result_image(epoch, model, number):
     if epoch % 10 == 0:
-        saveimagedir = '../ResNet_Test1/save_font_image/' + str(number) + '/' + str(epoch) + '/'
-        inputimagedir = '../Deep_model/test1.jpg'
+        saveimagedir = '../ResNet_Test2/save_font_image/' + str(number) + '/' + str(epoch) + '/'
+        inputimagedir = '../ResNet_Test2/test1.jpg'
         input_data = input_Deepmodel_image(inputimagedir)
         model.eval()
         check_point = 0
@@ -121,8 +121,6 @@ def print_log(text, filename="log.txt"):
 
 def make_one_hot() :
     a = np.array([a for a in range(2350)])
-    b = np.zeros((2350,2350))
-    b[np.arange(2350), a] = 1
     return b
 
 
@@ -131,7 +129,7 @@ def Package_Data_onehot_Slice_Loder(number):
     numpy_x = list()
     numpy_label = list()
     numpy_onehot = list()
-    with gzip.open('../Deep_model/Conpress/train_' + str(number) + '.pkl', "rb") as of:
+    with gzip.open('../../../hhjung/Conpress_Son/train_' + str(number) + '.pkl', "rb") as of:
         while True:
             try:
                 e = pickle.load(of)
@@ -159,7 +157,7 @@ def Package_Data_onehot_Slice_Loder(number):
     numpy_test = list()
     numpy_label_test = list()
     numpy_onehot_test = list()
-    with gzip.open('../Deep_model/Conpress/test_' + str(number) + '.pkl', "rb") as of:
+    with gzip.open('../../../hhjung/Conpress_Son/test_' + str(number) + '.pkl', "rb") as of:
         while True:
             try:
                 e = pickle.load(of)

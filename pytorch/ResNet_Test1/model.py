@@ -81,7 +81,7 @@ class ResNet(nn.Module):
         # 256 8 8
 
         self.MSEavgpool = nn.AvgPool2d(kernel_size=2, stride=2)
-        self.sigmoid = nn.Sigmoid()
+        self.Tanh = nn.Tanh()
 
         self.Class_avgpool = nn.AvgPool2d(kernel_size=8, stride=1)
         self.fc = nn.Linear(256, num_classes)
@@ -97,7 +97,7 @@ class ResNet(nn.Module):
 
         MSE_out = self.MSEavgpool(x) #256*4*4
         MSE_out = MSE_out.view(MSE_out.size(0), 1, 64, 64)
-        MSE_out = self.sigmoid(MSE_out)
+        MSE_out = self.Tanh(MSE_out)
 
 
         x = self.Class_avgpool(x)
