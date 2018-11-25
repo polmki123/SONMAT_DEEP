@@ -51,14 +51,14 @@ def check_model_result_image(epoch, model, number):
             i = np.array(i)
             i = i.reshape(1, 9, 64, 64)
             input = torch.from_numpy(i)
-            input = normalize_function(input)
+            input = normalize_image(input)
             input = Variable(input.cuda())
             input = input.type(torch.cuda.FloatTensor)
             output = model(input)
             output = Variable(output[0]).data.cpu().numpy()
             output = output.reshape(64, 64)
             # print(output)
-            output = (output) * 255
+            output = renormalize_image(output)
             img = Image.fromarray(output.astype('uint8'), 'L')
             # img = PIL.ImageOps.invert(img)
             if not os.path.exists(saveimagedir):
@@ -76,7 +76,8 @@ def normalize_image(img):
     return normalized
 
 def normalize_function(img):
-    img = img/255
+    img = (img - img.min()) / (img.max() - img.min())
+    img = (img - img.mean()) / (img.std())
     return img
 
 def renormalize_image(img):

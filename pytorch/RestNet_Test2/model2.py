@@ -87,7 +87,7 @@ class ResNet(nn.Module):
         self.conv1 = nn.Conv2d(9, 64, kernel_size=3, stride=2, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(True)
-        self.relu2 = nn.ReLU()
+        self.Tanh = nn.Tanh()
         self.n = 4
 
         # 64 32 32
@@ -167,6 +167,6 @@ class ResNet(nn.Module):
         final = final.view(final.size(0), -1)
         final = self.fc_final(final)
 
-        x = self.relu2(x)
+        x = self.Tanh(x)
 
         return [x, middle, final] # MSE, 
