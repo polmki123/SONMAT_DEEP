@@ -42,7 +42,7 @@ def main(model_dir, number):
         print("NO GPU -_-;")
         
     # Loss and Optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas = (0.5, 0.999))
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion_MSE = nn.MSELoss().cuda()
     criterion_Cross_last = nn.CrossEntropyLoss().cuda()
     checkpoint = utils.load_checkpoint(model_dir+str(number))
