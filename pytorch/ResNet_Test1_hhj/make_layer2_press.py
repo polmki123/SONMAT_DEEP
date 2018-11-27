@@ -54,7 +54,7 @@ def main(model_dir, number,package_dir):
         model.load_state_dict(checkpoint['state_dict'])
 
     
-    train(model, train_loader,package_dir)
+    # train(model, train_loader,package_dir)
     test(model, test_loader,package_dir)
     
     
@@ -120,7 +120,7 @@ def test(model, train_loader,package_dir):
             frame_data = frame_data.reshape(1,64,64)
             output = model(data)
             output = Variable(output[1]).data.cpu().numpy()
-            output = output.reshape(1,64,64)
+            output = output.reshape(64,64)
             output = utils.normalize_function(output)
             img = Image.fromarray(output.astype('uint8'), 'L')
             img = PIL.ImageOps.invert(img)

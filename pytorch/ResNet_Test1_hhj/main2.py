@@ -13,7 +13,7 @@ import numpy as np
 import PIL.ImageOps
 from model_iter import *
 
-os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+os.environ["CUDA_VISIBLE_DEVICES"] = '6'
 
 def main(model_dir, number):
     utils.default_model_dir = model_dir
@@ -21,7 +21,7 @@ def main(model_dir, number):
     lr = 0.0002
     EPOCH = 200 
     start_epoch = 0
-    train_Data, test_Data = utils.Second_Package_Data_onehot_Slice_Loder(number+1)
+    train_Data, test_Data = utils.Second_Package_Data_onehot_Slice_Loder()
     
     train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
     test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
@@ -50,11 +50,10 @@ def main(model_dir, number):
     if not checkpoint:
         pass
     else:
-        start_epoch = checkpoint['epoch'] + 1
         model.load_state_dict(checkpoint['state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer'])
 
-    for epoch in range(start_epoch, EPOCH+1):
+    for epoch in range(0, EPOCH+1):
         if epoch < 100:
             learning_rate = lr
         elif epoch < 150:
@@ -67,7 +66,7 @@ def main(model_dir, number):
         train(model, optimizer, criterion_MSE, criterion_Cross_last , train_loader, epoch)
         test(model, criterion_MSE, criterion_Cross_last , test_loader, epoch)
         utils.save_model_checkpoint(epoch, model, model_dir, number, optimizer)
-        utils.check_model_result_image(epoch, model, number)
+        utils.check_model2_result_image(epoch, model, number)
         
     # utils.conv_weight_L1_printing(model.module)
     now = time.gmtime(time.time() - start_time)
