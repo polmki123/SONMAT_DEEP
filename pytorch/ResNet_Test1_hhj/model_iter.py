@@ -51,10 +51,10 @@ class BasicBlock(nn.Module):
         out = self.relu(out)
         return out
 
-class ResNet(nn.Module):
+class ResNet2(nn.Module):
     def __init__(self, num_classes=2350, resnet_layer=56):
         super(ResNet, self).__init__()
-        self.conv1 = nn.Conv2d(9, 64, kernel_size=3, stride=2, padding=1, bias=False)
+        self.conv1 = nn.Conv2d(2, 64, kernel_size=3, stride=2, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
         self.Tanh = nn.Tanh()

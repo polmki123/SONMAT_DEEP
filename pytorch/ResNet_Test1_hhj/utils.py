@@ -164,15 +164,16 @@ def make_one_hot() :
     a = np.array([a for a in range(2350)])
     return a
 
-
 def Package_Data_onehot_Slice_Loder(number):
     # read train data
     numpy_x = list()
     numpy_label = list()
     numpy_onehot = list()
-    with gzip.open('../Deep_model/Conpress/train_' + str(number) + '.pkl', "rb") as of:
+    load_check = 0
+    with gzip.open('../../../hhjung/Conpress_Son/train_' + str(number) + '.pkl', "rb") as of:
         while True:
             try:
+                load_check = load_check + 1
                 e = pickle.load(of)
                 numpy_x.extend(e[0])
                 numpy_label.extend(e[1])
@@ -198,9 +199,11 @@ def Package_Data_onehot_Slice_Loder(number):
     numpy_test = list()
     numpy_label_test = list()
     numpy_onehot_test = list()
-    with gzip.open('../Deep_model/Conpress/test_' + str(number) + '.pkl', "rb") as of:
-        while True:
+    load_check = 0
+    with gzip.open('../../../hhjung/Conpress_Son/test_' + str(number) + '.pkl', "rb") as of:
+        while True :
             try:
+                load_check = load_check + 1
                 e = pickle.load(of)
                 numpy_test.extend(e[0])
                 numpy_label_test.extend(e[1])
