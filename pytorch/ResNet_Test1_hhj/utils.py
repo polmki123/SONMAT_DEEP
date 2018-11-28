@@ -55,8 +55,8 @@ def input_Deepmodel2_image(inputimagedir):
 def check_model_result_image(epoch, model, number):
     if epoch % 10 == 0:
         saveimagedir = '../ResNet_Test1/save_font_image/' + str(number) + '/' + str(epoch) + '/'
-        inputimagedir = '../Deep_model/test1.jpg'
-        input_data = input_Deepmodel2_image(inputimagedir)
+        inputimagedir = '../ResNet_Test1/test1.jpg'
+        input_data = input_Deepmodel_image(inputimagedir)
         model.eval()
         check_point = 0
         for i in input_data:

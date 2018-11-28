@@ -15,7 +15,7 @@ from model import *
 import gzip
 import pickle
 
-os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+os.environ["CUDA_VISIBLE_DEVICES"] = '6'
 
 def main(model_dir, number,package_dir):
     utils.default_model_dir = model_dir
@@ -45,7 +45,7 @@ def main(model_dir, number,package_dir):
         print("NO GPU -_-;")
         
     # Loss and Optimizer
-    checkpoint = utils.load_checkpoint(model_dir+str(number))
+    checkpoint = utils.load_checkpoint(model_dir)
 
     if not checkpoint:
         pass
@@ -54,7 +54,7 @@ def main(model_dir, number,package_dir):
         model.load_state_dict(checkpoint['state_dict'])
 
     
-    # train(model, train_loader,package_dir)
+    train(model, train_loader,package_dir)
     test(model, test_loader,package_dir)
     
     
@@ -82,6 +82,7 @@ def train(model, train_loader,package_dir):
             output = model(data)
             output = Variable(output[1]).data.cpu().numpy()
             output = output.reshape(64,64)
+            output = utils.renormalize_image(output)
             output = utils.normalize_function(output)
             img = Image.fromarray(output.astype('uint8'), 'L')
             img = PIL.ImageOps.invert(img)
@@ -121,6 +122,7 @@ def test(model, train_loader,package_dir):
             output = model(data)
             output = Variable(output[1]).data.cpu().numpy()
             output = output.reshape(64,64)
+            output = utils.renormalize_image(output)
             output = utils.normalize_function(output)
             img = Image.fromarray(output.astype('uint8'), 'L')
             img = PIL.ImageOps.invert(img)
@@ -158,6 +160,6 @@ def do_learning(model_dir, number,package_dir):
 if __name__ == '__main__':
     print(str(1)+'for train')
     package_dir = '../ResNet_Test1/Conpress/'
-    model_dir = '../ResNet_Test1/model/{}'.format(1)
+    model_dir = '../ResNet_Test1/model/'
     do_learning(model_dir, 1,package_dir)
     
