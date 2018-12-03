@@ -15,7 +15,7 @@ default_model_dir = "./"
 
 def save_model_checkpoint(epoch, model, model_dir, optimizer):
     if epoch % 20 == 0:
-        model_filename = '/checkpoint_%02d.pth.tar' % epoch
+        model_filename = os.path.join(model_dir, 'checkpoint_%02d.pth.tar' % epoch)
         save_checkpoint({
             'epoch': epoch,
             'model': model,
