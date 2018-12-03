@@ -1,193 +1,86 @@
 import torch
-import torch.nn as tnn
+
 import torch.backends.cudnn as cudnn
-import torchvision.transforms as transforms
 from torch.autograd import Variable
 import utils
 import os
-import time
+
 import glob
 from PIL import Image
 import numpy as np
 import PIL.ImageOps
 
-os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+import argparse
+
+import numpy as np
+import math
+import itertools
+import time
+import datetime
+import sys
+
+import torchvision.transforms as transforms
+from torchvision.utils import save_image
+
+from models import *
+from datasets import *
 
 
-class Generator(tnn.Module):
-    def __init__(self):
-        super(Generator, self).__init__()
-        self.layer1 = tnn.Sequential(
-            # 1-1 conv layer
-            # batch_size * 3*64*64
-            tnn.Conv2d(10, 64, kernel_size=3, padding=1),
-            tnn.BatchNorm2d(64),
-            tnn.LeakyReLU(0.1),
-            
-            # 1-2 conv layer
-            # batch_size * 64*64*64
-            tnn.Conv2d(64, 64, kernel_size=3, padding=1),
-            tnn.BatchNorm2d(64),
-            tnn.LeakyReLU(0.1),
-            
-            # 1 Pooling layer
-            # batch_size * 64*64*64
-            tnn.MaxPool2d(kernel_size=2, stride=2))
-        
-        self.layer2 = tnn.Sequential(
-            
-            # 2-1 conv layer
-            # batch_size * 64*32*32
-            tnn.Conv2d(64, 128, kernel_size=3, padding=1),
-            tnn.BatchNorm2d(128),
-            tnn.LeakyReLU(0.1),
-            
-            # 2-2 conv layer
-            # batch_size * 128*32*32
-            tnn.Conv2d(128, 128, kernel_size=3, padding=1),
-            tnn.BatchNorm2d(128),
-            tnn.LeakyReLU(0.1),
-            
-            # 2 Pooling lyaer
-            # batch_size * 128*32*32
-            tnn.MaxPool2d(kernel_size=2, stride=2))
-        
-        self.layer3 = tnn.Sequential(
-            
-            # 3-1 conv layer
-            # batch_size * 128*16*16
-            tnn.Conv2d(128, 256, kernel_size=3, padding=1),
-            tnn.BatchNorm2d(256),
-            tnn.LeakyReLU(0.1),
-            
-            # 3-2 conv layer
-            # batch_size * 256*16*16
-            tnn.Conv2d(256, 256, kernel_size=3, padding=1),
-            tnn.BatchNorm2d(256),
-            tnn.LeakyReLU(0.1),
-            
-            # 3 Pooling layer
-            # batch_size * 256*16*16
-            tnn.MaxPool2d(kernel_size=2, stride=2))
-        
-        self.layer4 = tnn.Sequential(
-            
-            # 4-1 conv layer
-            # batch_size * 512*8*8
-            tnn.Conv2d(256, 512, kernel_size=3, padding=1),
-            tnn.BatchNorm2d(512),
-            tnn.LeakyReLU(0.1),
-            
-            # 4-2 conv layer
-            # batch_size * 512*8*8
-            tnn.Conv2d(512, 512, kernel_size=8,stride = 1, padding=0),
-            tnn.BatchNorm2d(512),
-            tnn.LeakyReLU(0.1),
-            
-            # 4 Pooling layer
-            # batch_size * (64 * 8) * 1 * 1
-            tnn.ConvTranspose2d(64 * 8, 64 * 16, 4, 1, 0))
-        
-        self.layer5 = tnn.Sequential(
-            
-            # 5-1 conv layer
-            # batch_size * (64*16)*4*4
-            tnn.ConvTranspose2d(64 * 16, 64 * 8, 4, 2, 1),
-            tnn.BatchNorm2d(512),
-            tnn.LeakyReLU(0.1),
-            
-            # 5-2 conv layer
-            # batch_size * 512*8*8
-            tnn.ConvTranspose2d(64 * 8, 64 * 2, 4, 2, 1),
-            tnn.BatchNorm2d(128),
-            tnn.LeakyReLU(0.1))
-            
-            # 5 Pooling layer
-            # batch_size * 4*4*512
-            # tnn.MaxPool2d(kernel_size=2, stride=2))
-        
-        self.layer6 = tnn.Sequential(
-            
-            # 6 Transpose
-            # batch_size * (64 * 2) * 16 * 16
-            tnn.ConvTranspose2d(64 * 2, 32, 4, 2, 1),
-            tnn.BatchNorm2d(32),
-            tnn.LeakyReLU(0.1)
-            )
-        
-        self.layer7 = tnn.Sequential(
-            
-            # 7 Transpose
-            # batch_size * 32*32*32
-            tnn.ConvTranspose2d(32, 8, kernel_size=4, stride=2, padding=1),
-            tnn.BatchNorm2d(8),
-            tnn.LeakyReLU(0.1))
-        
-        self.layer8 = tnn.Sequential(
-            
-            # 8 Transpose
-            # batch_size * 8*64*64
-            tnn.Conv2d(8, 1, kernel_size=3, padding=1),
-            tnn.LeakyReLU(0.1))
-            # batch_size * 1*64*64
-        
-    def forward(self, x):
-        out = self.layer1(x)
-        out = self.layer2(out)
-        out = self.layer3(out)
-        out = self.layer4(out)
-        out = self.layer5(out)
-        out = self.layer6(out)
-        out = self.layer7(out)
-        out = self.layer8(out)
-            
-        return out
+import torch.nn.functional as F
 
-class Discriminator(tnn.Module):
-    def __init__(self):
-        super(Discriminator, self).__init__()
-        self.main = tnn.Sequential(
-            #""" color imgage (fake or real image)"""
-            # 1 * 64 * 64
-            tnn.Conv2d(1,64,kernel_size = 4, stride = 2, padding = 1, bias = False),
-            tnn.LeakyReLU(0.2, inplace = True),
-            
-            # 64 * 32 * 32
-            tnn.Conv2d(64,128,kernel_size = 4, stride = 2, padding = 1, bias = False),
-            tnn.BatchNorm2d(128),
-            tnn.LeakyReLU(0.2, inplace = True),
-            
-            # 128 * 16 * 16
-            tnn.Conv2d(128, 256, kernel_size = 4, stride = 2, padding = 1, bias = False),
-            tnn.BatchNorm2d(256),
-            tnn.LeakyReLU(0.2, inplace = True),
-            
-            # 256 * 8 * 8
-            tnn.Conv2d(256, 512, kernel_size = 4, stride = 2, padding = 1, bias = False),
-            tnn.BatchNorm2d(512),
-            tnn.LeakyReLU(0.2, inplace = True),
-            )
-        
-        # 512 * 4 * 4
-        self.fc = tnn.Sequential(
-            tnn.Linear(512*4*4 , 512),
-            tnn.Linear(512, 256),
-            tnn.Linear(256, 128),
-            tnn.Sigmoid()
-        )
-        
-    def forward(self, input, b_size):
-        output = self.main(input)
-        output = self.fc(output.view(b_size,-1))
-        return output
+os.environ["CUDA_VISIBLE_DEVICES"] = '7'
 
-def weights_init(m):
-    classname = m.__class__.__name__
-    if classname.find('Conv') != -1:         # Conv weight init
-        m.weight.data.normal_(0.0, 0.02)
-    elif classname.find('BatchNorm') != -1:  # BatchNorm weight init
-        m.weight.data.normal_(1.0, 0.02)
-        m.bias.data.fill_(0)
+parser = argparse.ArgumentParser()
+parser.add_argument('--epoch', type=int, default=0, help='epoch to start training from')
+parser.add_argument('--n_epochs', type=int, default=200, help='number of epochs of training')
+parser.add_argument('--dataset_name', type=str, default="facades", help='name of the dataset')
+parser.add_argument('--batch_size', type=int, default=128, help='size of the batches')
+parser.add_argument('--lr', type=float, default=0.0002, help='adam: learning rate')
+parser.add_argument('--b1', type=float, default=0.5, help='adam: decay of first order momentum of gradient')
+parser.add_argument('--b2', type=float, default=0.999, help='adam: decay of first order momentum of gradient')
+parser.add_argument('--decay_epoch', type=int, default=100, help='epoch from which to start lr decay')
+parser.add_argument('--n_cpu', type=int, default=8, help='number of cpu threads to use during batch generation')
+parser.add_argument('--img_height', type=int, default=64, help='size of image height')
+parser.add_argument('--img_width', type=int, default=64, help='size of image width')
+parser.add_argument('--channels', type=int, default=1, help='number of image channels')
+parser.add_argument('--sample_interval', type=int, default=500, help='interval between sampling of images from generators')
+parser.add_argument('--checkpoint_interval', type=int, default=-1, help='interval between model checkpoints')
+opt = parser.parse_args()
+
+cuda = True if torch.cuda.is_available() else False
+
+# Loss functions
+criterion_GAN = torch.nn.MSELoss()
+criterion_pixelwise = torch.nn.L1Loss()
+
+# Loss weight of L1 pixel-wise loss between translated image and real image
+lambda_pixel = 100
+
+# Calculate output of image discriminator (PatchGAN)
+patch = (1, opt.img_height//2**4, opt.img_width//2**4)
+
+
+# Initialize generator and discriminator
+generator = GeneratorUNet()
+discriminator = Discriminator()
+
+if cuda:
+    generator = generator.cuda()
+    discriminator = discriminator.cuda()
+    criterion_GAN.cuda()
+    criterion_pixelwise.cuda()
+
+generator.apply(weights_init_normal)
+discriminator.apply(weights_init_normal)
+
+
+# Optimizers
+optimizer_G = torch.optim.Adam(generator.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
+optimizer_D = torch.optim.Adam(discriminator.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
+
+
+train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=128, shuffle=True, num_workers = 4)
+test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=128, shuffle=False, num_workers = 4)
 
 def to_variable(x):
     if torch.cuda.is_available:

@@ -104,16 +104,7 @@ def print_log(text, filename="log.txt"):
 def Package_Data_Slice_Loader(number):
     numpy_x = list()
     numpy_label = list()
-    transform = transforms.Compose(
-        [transforms.ToTensor(),
-         transforms.Normalize((0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5), (0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5))
-         ])
-    test_transform = transforms.Compose(
-        [transforms.ToTensor(),
-         transforms.Normalize((0.5),
-                              (0.5))
-         ])
-    with gzip.open('../Deep_model/Conpress/train_' + str(number) +'.pkl', "rb") as of:
+    with gzip.open('../../hhjung/Conpress_Son/train_' + str(number) +'.pkl', "rb") as of:
         while True:
             try:
                 e = pickle.load(of)
@@ -136,7 +127,7 @@ def Package_Data_Slice_Loader(number):
     print(label_datas.shape)
     numpy_test = list()
     numpy_label_test = list()
-    with gzip.open('../Deep_model/Conpress/test_' + str(number) + '.pkl', "rb") as of:
+    with gzip.open('../../hhjung/Conpress_Son/train_' + str(number) + '.pkl', "rb") as of:
         while True:
             try:
                 e = pickle.load(of)

@@ -38,13 +38,6 @@ def main(inputimagedir, model_dir):
 
 	model = ResNet()
 	model = nn.DataParallel(model)
-	# if torch.cuda.is_available():
-	#    print("USE", torch.cuda.device_count(), "GPUs!")
-	#    model = tnn.DataParallel(model).cuda()
-	#    cudnn.benchmark = True
-	# else:
-	#    print("NO GPU -_-;")
-
 	checkpoint = utils.load_checkpoint(model_dir+str(12))
 	if not checkpoint:
 		pass
@@ -73,6 +66,7 @@ def main(inputimagedir, model_dir):
         
 	now = time.gmtime(time.time() - start_time)
 	print('{} hours {} mins {} secs for data'.format(now.tm_hour, now.tm_min, now.tm_sec))
+	
 if __name__ == "__main__":
 	inputimagedir = '../Deep_model/test1.jpg'
 	model_dir = '../ResNet_Test1/model/'
