@@ -22,10 +22,10 @@ def main(model_dir, number):
     lr = 0.0002
     EPOCH = 200 
     start_epoch = 0
-    train_Data, test_Data = utils.font_data_onehot_Slice_Loder()
+    # train_Data, test_Data = utils.font_data_onehot_Slice_Loder()
     
-    train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
-    test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
+    # train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
+    # test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
 
     start_time = time.time()
     model = label_model.ResNet()
@@ -33,8 +33,8 @@ def main(model_dir, number):
     if torch.cuda.is_available():
         # os.environ["CUDA_VISIBLE_DEVICES"] = '0'
         print("USE", torch.cuda.device_count(), "GPUs!")
-        model = nn.DataParallel(model).cuda()
-        cudnn.benchmark = True
+        # model = nn.DataParallel(model).cuda()
+        # cudnn.benchmark = True
 
     else:
         print("NO GPU -_-;")
@@ -54,9 +54,10 @@ def main(model_dir, number):
         model.load_state_dict(checkpoint['state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer'])
 
+        print(model1)
         print(model2)
         print(start_epoch)
-        
+
 
     # for epoch in range(start_epoch, EPOCH+1):
     #     if epoch < 100:

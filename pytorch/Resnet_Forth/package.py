@@ -22,7 +22,7 @@ def make_one_hot() :
 # read train, test data
 def pickle_slice_examples(package_dir):
     #read directory
-    train_dir = '../../../hhjung/Conpress_Son/label/'
+    train_dir = '/data2/hhjung/Conpress_Son/label/'
     #read all handwrite data
     file_list = os.listdir(train_dir)
     random.shuffle(file_list)
