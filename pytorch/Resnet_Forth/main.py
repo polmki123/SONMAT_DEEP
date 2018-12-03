@@ -54,17 +54,13 @@ def main(model_dir, number):
     else:
         start_epoch = checkpoint['epoch'] + 1
         # label_model.load_state_dict(checkpoint['state_dict'])
-        # optimizer.load_state_dict(checkpoint['optimizer'])
+        optimizer.load_state_dict(checkpoint['optimizer'])
 
         new_state_dict = OrderedDict()
         for k, v in checkpoint['state_dict'].items():
             name = k[7:] # remove `module.`
             new_state_dict[name] = v
         label_model.load_state_dict(new_state_dict)
-
-        new_state_dict = OrderedDict()
-        for k, v in checkpoint['optimizer'].items():
-            print(k,v)
 
         model = main_model.ResNet(pretrained=label_model)
 
