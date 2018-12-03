@@ -52,8 +52,9 @@ class BasicBlock(nn.Module):
         return out
 
 class ResNet(nn.Module):
-    def __init__(self, num_classes=2350, resnet_layer=56):
+    def __init__(self, pretrained, num_classes=2350, resnet_layer=56):
         super(ResNet, self).__init__()
+        self.pretrained = pretrained
         self.conv1 = nn.Conv2d(9, 64, kernel_size=3, stride=2, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
@@ -99,9 +100,8 @@ class ResNet(nn.Module):
         MSE_out = MSE_out.view(MSE_out.size(0), 1, 64, 64)
         MSE_out = self.Tanh(MSE_out)
 
+        CLASS_out = self.pretrained(MSE_out)
 
-        x = self.Class_avgpool(x)
-        x = x.view(x.size(0), -1)
-        x = self.fc(x)
 
-        return [x, MSE_out]
+
+        return [MSE_out, CLASS_out]

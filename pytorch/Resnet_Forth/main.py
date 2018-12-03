@@ -11,8 +11,10 @@ import glob
 from PIL import Image
 import numpy as np
 import PIL.ImageOps
-import label_model
+from model import *
 import main_model
+from collections import OrderedDict
+
 
 os.environ["CUDA_VISIBLE_DEVICES"] = '6'
 
@@ -26,9 +28,10 @@ def main(model_dir, number):
     
     # train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
     # test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
+    
+    label_model = ResNet()
 
     start_time = time.time()
-    model = label_model.ResNet()
     
     if torch.cuda.is_available():
         # os.environ["CUDA_VISIBLE_DEVICES"] = '0'
@@ -40,7 +43,7 @@ def main(model_dir, number):
         print("NO GPU -_-;")
         
     # Loss and Optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer = torch.optim.Adam(label_model.parameters(), lr=lr)
     criterion_Cross = nn.CrossEntropyLoss().cuda()
     
     #load checkpoint
@@ -49,13 +52,26 @@ def main(model_dir, number):
     if not checkpoint:
         pass
     else:
-        model2 = checkpoint['model']
         start_epoch = checkpoint['epoch'] + 1
-        model.load_state_dict(checkpoint['state_dict'])
-        optimizer.load_state_dict(checkpoint['optimizer'])
+        # label_model.load_state_dict(checkpoint['state_dict'])
+        # optimizer.load_state_dict(checkpoint['optimizer'])
 
-        print(model1)
-        print(model2)
+        new_state_dict = OrderedDict()
+        for k, v in checkpoint['state_dict'].items():
+            name = k[7:] # remove `module.`
+            new_state_dict[name] = v
+        label_model.load_state_dict(new_state_dict)
+
+        new_state_dict = OrderedDict()
+        for k, v in checkpoint['optimizer'].items():
+            name = k[7:] # remove `module.`
+            new_state_dict[name] = v
+        optimizer.load_state_dict(new_state_dict)
+
+        model = main_model.ResNet(pretrained=label_model)
+
+        print('MODEL', model)
+        print('LABEL_MODEL', label_model)
         print(start_epoch)
 
 
