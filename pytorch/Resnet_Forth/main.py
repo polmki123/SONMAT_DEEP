@@ -149,6 +149,9 @@ def do_learning(model_dir, number):
 
 if __name__ == '__main__':
     print(str(0)+'for train')
-    model_dir = '/data2/hhjung/Sonmat_Result/Resnet_Forth/model'
+    model_dir = '/data2/hhjung/Sonmat_Result/Label_Learning/model'
+    # '/data2/hhjung/Sonmat_Result/Resnet_Forth/model'
+
+
     do_learning(model_dir, 0)
         
