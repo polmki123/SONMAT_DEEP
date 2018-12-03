@@ -64,9 +64,7 @@ def main(model_dir, number):
 
         new_state_dict = OrderedDict()
         for k, v in checkpoint['optimizer'].items():
-            name = k[7:] # remove `module.`
-            new_state_dict[name] = v
-        optimizer.load_state_dict(new_state_dict)
+            print(k,v)
 
         model = main_model.ResNet(pretrained=label_model)
 
@@ -74,6 +72,11 @@ def main(model_dir, number):
         print('LABEL_MODEL', label_model)
         print(start_epoch)
 
+    model = nn.DataParallel(model).cuda()
+    print('MODEL_', model)
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    criterion_Cross = nn.CrossEntropyLoss().cuda()
 
     # for epoch in range(start_epoch, EPOCH+1):
     #     if epoch < 100:
