@@ -24,7 +24,7 @@ def save_model_checkpoint(epoch, model, model_dir, optimizer):
         }, model_filename, model_dir )
 
 
-def input_Deepmodel_image(inputimagedir):
+def input_Deepmodel_image(inputimagedir, frame_dir):
     frame_dir = '/data2/hhjung/Conpress_Son/frame_label/'
     frame_paths = glob.glob(os.path.join(frame_dir, '*.jpg'))
     input_data = list()
@@ -38,24 +38,24 @@ def input_Deepmodel_image(inputimagedir):
     
     return input_data
 
-def input_Deepmodel2_image(inputimagedir):
-    frame_dir = '/data2/hhjung/Conpress_Son/frame_label/'
-    frame_paths = glob.glob(os.path.join(frame_dir, '*.jpg'))
-    input_paths = glob.glob(os.path.join(inputimagedir, '*.png'))
-    input_data = list()
-    for i in range(len(frame_paths)):
-        frame_image = np.array(Image.open(frame_paths[i])).reshape(1, 64, 64)
-        input_image = np.array(Image.open(input_paths[i])).reshape(1, 64, 64)
-        Concat_data = np.append(input_image, frame_image, axis=0)# 2*64*64
-        if ((2, 64, 64) == Concat_data.shape):
-            input_data.append(Concat_data)
+# def input_Deepmodel2_image(inputimagedir, frame_dir ):
+#     frame_dir = '/data2/hhjung/Conpress_Son/frame_label/'
+#     frame_paths = glob.glob(os.path.join(frame_dir, '*.jpg'))
+#     input_paths = glob.glob(os.path.join(inputimagedir, '*.png'))
+#     input_data = list()
+#     for i in range(len(frame_paths)):
+#         frame_image = np.array(Image.open(frame_paths[i])).reshape(1, 64, 64)
+#         input_image = np.array(Image.open(input_paths[i])).reshape(1, 64, 64)
+#         Concat_data = np.append(input_image, frame_image, axis=0)# 2*64*64
+#         if ((2, 64, 64) == Concat_data.shape):
+#             input_data.append(Concat_data)
     
-    return input_data
+#     return input_data
 
 def check_model_result_image(epoch, model, number):
     if epoch % 10 == 0:
-        saveimagedir = '../ResNet_Test3/save_font_image/' + str(number) + '/' + str(epoch) + '/'
-        inputimagedir = '../ResNet_Test1/test1.jpg'
+        saveimagedir = '/data2/hhjung/Sonmat_Result/Resnet_Forth/result_image/' + str(number) + '/' + str(epoch) + '/'
+        inputimagedir = '/data2/hhjung/Conpress_Son/test1.jpg'
         input_data = input_Deepmodel_image(inputimagedir)
         model.eval()
         check_point = 0
@@ -79,32 +79,32 @@ def check_model_result_image(epoch, model, number):
             img.save(saveimagedir + str(check_point) + 'my.jpg')
 
 
-def check_model2_result_image(epoch, model, number):
-    if epoch % 10 == 0:
-        saveimagedir = '../ResNet_Test3/save_font_image2/' + str(number) + '/' + str(epoch) + '/'
-        inputimagedir = '../ResNet_Test1/save_image/'
-        input_data = input_Deepmodel2_image(inputimagedir)
-        model.eval()
-        check_point = 0
-        for i in input_data:
-            check_point = check_point + 1
-            i = np.array(i)
-            i = i.reshape(1, 2, 64, 64)
-            input = torch.from_numpy(i)
-            input = Variable(input.cuda())
-            input = input.type(torch.cuda.FloatTensor)
-            input = normalize_image(input)
-            output = model(input)
-            output = Variable(output[1]).data.cpu().numpy()
-            output = output.reshape(64, 64)
-            # print(output)
-            output = renormalize_image(output)
-            output = normalize_function(output)
-            img = Image.fromarray(output.astype('uint8'), 'L')
-            img = PIL.ImageOps.invert(img)
-            if not os.path.exists(saveimagedir):
-                os.makedirs(saveimagedir)
-            img.save(saveimagedir + str(check_point) + 'my.jpg')
+# def check_model2_result_image(epoch, model, number):
+#     if epoch % 10 == 0:
+#         saveimagedir = '/data2/hhjung/Sonmat_Result/Resnet_Forth/result_image/' + str(number) + '/' + str(epoch) + '/'
+#         inputimagedir = '/data2/hhjung/Conpress_Son/test1.jpg'
+#         input_data = input_Deepmodel2_image(inputimagedir)
+#         model.eval()
+#         check_point = 0
+#         for i in input_data:
+#             check_point = check_point + 1
+#             i = np.array(i)
+#             i = i.reshape(1, 2, 64, 64)
+#             input = torch.from_numpy(i)
+#             input = Variable(input.cuda())
+#             input = input.type(torch.cuda.FloatTensor)
+#             input = normalize_image(input)
+#             output = model(input)
+#             output = Variable(output[1]).data.cpu().numpy()
+#             output = output.reshape(64, 64)
+#             # print(output)
+#             output = renormalize_image(output)
+#             output = normalize_function(output)
+#             img = Image.fromarray(output.astype('uint8'), 'L')
+#             img = PIL.ImageOps.invert(img)
+#             if not os.path.exists(saveimagedir):
+#                 os.makedirs(saveimagedir)
+#             img.save(saveimagedir + str(check_point) + 'my.jpg')
             
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
@@ -166,10 +166,11 @@ def print_log(text, filename="log.txt"):
 
 def font_data_onehot_Slice_Loder():
     # read train data
+    data_dir = '/data2/hhjung/Conpress_Son/Font_Conpress/'
     numpy_x = list()
     numpy_label = list()
     load_check = 0
-    with gzip.open('./Conpress/font_train_label.pkl', "rb") as of:
+    with gzip.open(data_dir + 'font_train_label.pkl', "rb") as of:
         while True:
             try:
                 load_check = load_check + 1
@@ -194,7 +195,7 @@ def font_data_onehot_Slice_Loder():
     # read test data
     numpy_test = list()
     numpy_label_test = list()
-    with gzip.open('./Conpress/font_test_label.pkl', "rb") as of:
+    with gzip.open(data_dir + 'font_test_label.pkl', "rb") as of:
         while True:
             try:
                 e = pickle.load(of)
@@ -221,12 +222,13 @@ def font_data_onehot_Slice_Loder():
     return train_dataset, test_dataset
 
 def Package_Data_onehot_Slice_Loder(number):
+	data_dir = '/data2/hhjung/Conpress_Son/'
     # read train data
     numpy_x = list()
     numpy_label = list()
     numpy_onehot = list()
     load_check = 0
-    with gzip.open('/data2/hhjung/Conpress_Son/train_' + str(number) + '.pkl', "rb") as of:
+    with gzip.open( data_dir + 'train_' + str(number) + '.pkl', "rb") as of:
         while True:
             try:
                 load_check = load_check + 1
@@ -256,7 +258,7 @@ def Package_Data_onehot_Slice_Loder(number):
     numpy_label_test = list()
     numpy_onehot_test = list()
     load_check = 0
-    with gzip.open('/data2/hhjung/Conpress_Son/test_' + str(number) + '.pkl', "rb") as of:
+    with gzip.open(data_dir + 'test_' + str(number) + '.pkl', "rb") as of:
         while True :
             try:
                 load_check = load_check + 1
@@ -286,67 +288,6 @@ def Package_Data_onehot_Slice_Loder(number):
     
     return train_dataset, test_dataset
 
-def Second_Package_Data_onehot_Slice_Loder():
-    # read train data
-    numpy_x = list()
-    numpy_label = list()
-    numpy_onehot = list()
-    with gzip.open('../ResNet_Test1/Conpress/Resnet_train.pkl', "rb") as of:
-        while True:
-            try:
-                e = pickle.load(of)
-                numpy_x.extend(e[0])
-                numpy_label.extend(e[1])
-                numpy_onehot.extend(make_one_hot())
-                if len(numpy_x) % 1000 == 0:
-                    print("processed %d examples" % len(numpy_x))
-            except EOFError:
-                print('error')
-                break
-            except Exception:
-                print('error')
-                pass
-        print("unpickled total %d examples" % len(numpy_x))
-    
-    X_datas = np.array(numpy_x)
-    print(X_datas.shape)
-    label_datas = np.array(numpy_label)
-    print(label_datas.shape)
-    onehot_datas = np.array(numpy_onehot)
-    print(onehot_datas.shape)
-
-    # read test data
-    numpy_test = list()
-    numpy_label_test = list()
-    numpy_onehot_test = list()
-    with gzip.open('../ResNet_Test1/Conpress/Resnet_test.pkl', "rb") as of:
-        while True:
-            try:
-                e = pickle.load(of)
-                numpy_test.extend(e[0])
-                numpy_label_test.extend(e[1])
-                numpy_onehot_test.extend(make_one_hot())
-                if len(numpy_test) % 1000 == 0:
-                    print("processed %d examples" % len(numpy_test))
-            except EOFError:
-                print('error')
-                break
-            except Exception:
-                print('error')
-                pass
-        print("unpickled total %d examples" % len(numpy_test))
-    
-    X_test_datas = np.array(numpy_test)
-    print(X_test_datas.shape)
-    test_label_datas = np.array(numpy_label_test)
-    print(test_label_datas.shape)
-    onehot_test_datas = np.array(numpy_onehot_test)
-    print(onehot_test_datas.shape)
-    #make train, test dataset
-    train_dataset = torch.utils.data.TensorDataset(torch.from_numpy(X_datas), torch.from_numpy(label_datas), torch.from_numpy(onehot_datas))
-    test_dataset = torch.utils.data.TensorDataset(torch.from_numpy(X_test_datas), torch.from_numpy(test_label_datas),  torch.from_numpy(onehot_test_datas))
-    
-    return train_dataset, test_dataset
 
 if __name__ == '__main__':
     Package_Data_onehot_Slice_Loder(1)
