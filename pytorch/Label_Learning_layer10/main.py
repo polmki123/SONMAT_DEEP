@@ -16,7 +16,7 @@ from model import *
 os.environ["CUDA_VISIBLE_DEVICES"] = '5'
 
 def main(model_dir, number):
-    utils.default_model_dir = model_dir
+    utils.default_model_dir = main_model_dir + '/model/'
     BATCH_SIZE = 128
     lr = 0.01
     EPOCH = 100
