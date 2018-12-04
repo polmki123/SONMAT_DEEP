@@ -25,7 +25,7 @@ def save_model_checkpoint(epoch, model, model_dir, optimizer):
 
 
 def input_Deepmodel_image(inputimagedir):
-    frame_dir = '../../../hhjung/Conpress_Son/frame_label/'
+    frame_dir = '/data2/hhjung/Conpress_Son/frame_label/'
     frame_paths = glob.glob(os.path.join(frame_dir, '*.jpg'))
     input_data = list()
     for frame in frame_paths:
@@ -39,7 +39,7 @@ def input_Deepmodel_image(inputimagedir):
     return input_data
 
 def input_Deepmodel2_image(inputimagedir):
-    frame_dir = '../../../hhjung/Conpress_Son/frame_label/'
+    frame_dir = '/data2/hhjung/Conpress_Son/frame_label/'
     frame_paths = glob.glob(os.path.join(frame_dir, '*.jpg'))
     input_paths = glob.glob(os.path.join(inputimagedir, '*.png'))
     input_data = list()
@@ -166,7 +166,7 @@ def font_data_onehot_Slice_Loder():
     numpy_x = list()
     numpy_label = list()
     load_check = 0
-    with gzip.open('./Conpress/font_train_label.pkl', "rb") as of:
+    with gzip.open('/data2/hhjung/Conpress_Son/Font_Conpress/Font_font_train_label.pkl', "rb") as of:
         while True:
             try:
                 load_check = load_check + 1
@@ -191,7 +191,7 @@ def font_data_onehot_Slice_Loder():
     # read test data
     numpy_test = list()
     numpy_label_test = list()
-    with gzip.open('./Conpress/font_test_label.pkl', "rb") as of:
+    with gzip.open('/data2/hhjung/Conpress_Son/Font_Conpress/Font_font_test_label.pkl', "rb") as of:
         while True:
             try:
                 e = pickle.load(of)
@@ -223,7 +223,7 @@ def Package_Data_onehot_Slice_Loder(number):
     numpy_label = list()
     numpy_onehot = list()
     load_check = 0
-    with gzip.open('../../../hhjung/Conpress_Son/train_' + str(number) + '.pkl', "rb") as of:
+    with gzip.open('/data2/hhjung/Conpress_Son/train_' + str(number) + '.pkl', "rb") as of:
         while True:
             try:
                 load_check = load_check + 1
@@ -253,7 +253,7 @@ def Package_Data_onehot_Slice_Loder(number):
     numpy_label_test = list()
     numpy_onehot_test = list()
     load_check = 0
-    with gzip.open('../../../hhjung/Conpress_Son/test_' + str(number) + '.pkl', "rb") as of:
+    with gzip.open('/data2/hhjung/Conpress_Son/test_' + str(number) + '.pkl', "rb") as of:
         while True :
             try:
                 load_check = load_check + 1
@@ -283,67 +283,67 @@ def Package_Data_onehot_Slice_Loder(number):
     
     return train_dataset, test_dataset
 
-def Second_Package_Data_onehot_Slice_Loder():
-    # read train data
-    numpy_x = list()
-    numpy_label = list()
-    numpy_onehot = list()
-    with gzip.open('../ResNet_Test1/Conpress/Resnet_train.pkl', "rb") as of:
-        while True:
-            try:
-                e = pickle.load(of)
-                numpy_x.extend(e[0])
-                numpy_label.extend(e[1])
-                numpy_onehot.extend(make_one_hot())
-                if len(numpy_x) % 1000 == 0:
-                    print("processed %d examples" % len(numpy_x))
-            except EOFError:
-                print('error')
-                break
-            except Exception:
-                print('error')
-                pass
-        print("unpickled total %d examples" % len(numpy_x))
+# def Second_Package_Data_onehot_Slice_Loder():
+#     # read train data
+#     numpy_x = list()
+#     numpy_label = list()
+#     numpy_onehot = list()
+#     with gzip.open('../ResNet_Test1/Conpress/Resnet_train.pkl', "rb") as of:
+#         while True:
+#             try:
+#                 e = pickle.load(of)
+#                 numpy_x.extend(e[0])
+#                 numpy_label.extend(e[1])
+#                 numpy_onehot.extend(make_one_hot())
+#                 if len(numpy_x) % 1000 == 0:
+#                     print("processed %d examples" % len(numpy_x))
+#             except EOFError:
+#                 print('error')
+#                 break
+#             except Exception:
+#                 print('error')
+#                 pass
+#         print("unpickled total %d examples" % len(numpy_x))
     
-    X_datas = np.array(numpy_x)
-    print(X_datas.shape)
-    label_datas = np.array(numpy_label)
-    print(label_datas.shape)
-    onehot_datas = np.array(numpy_onehot)
-    print(onehot_datas.shape)
+#     X_datas = np.array(numpy_x)
+#     print(X_datas.shape)
+#     label_datas = np.array(numpy_label)
+#     print(label_datas.shape)
+#     onehot_datas = np.array(numpy_onehot)
+#     print(onehot_datas.shape)
 
-    # read test data
-    numpy_test = list()
-    numpy_label_test = list()
-    numpy_onehot_test = list()
-    with gzip.open('../ResNet_Test1/Conpress/Resnet_test.pkl', "rb") as of:
-        while True:
-            try:
-                e = pickle.load(of)
-                numpy_test.extend(e[0])
-                numpy_label_test.extend(e[1])
-                numpy_onehot_test.extend(make_one_hot())
-                if len(numpy_test) % 1000 == 0:
-                    print("processed %d examples" % len(numpy_test))
-            except EOFError:
-                print('error')
-                break
-            except Exception:
-                print('error')
-                pass
-        print("unpickled total %d examples" % len(numpy_test))
+#     # read test data
+#     numpy_test = list()
+#     numpy_label_test = list()
+#     numpy_onehot_test = list()
+#     with gzip.open('../ResNet_Test1/Conpress/Resnet_test.pkl', "rb") as of:
+#         while True:
+#             try:
+#                 e = pickle.load(of)
+#                 numpy_test.extend(e[0])
+#                 numpy_label_test.extend(e[1])
+#                 numpy_onehot_test.extend(make_one_hot())
+#                 if len(numpy_test) % 1000 == 0:
+#                     print("processed %d examples" % len(numpy_test))
+#             except EOFError:
+#                 print('error')
+#                 break
+#             except Exception:
+#                 print('error')
+#                 pass
+#         print("unpickled total %d examples" % len(numpy_test))
     
-    X_test_datas = np.array(numpy_test)
-    print(X_test_datas.shape)
-    test_label_datas = np.array(numpy_label_test)
-    print(test_label_datas.shape)
-    onehot_test_datas = np.array(numpy_onehot_test)
-    print(onehot_test_datas.shape)
-    #make train, test dataset
-    train_dataset = torch.utils.data.TensorDataset(torch.from_numpy(X_datas), torch.from_numpy(label_datas), torch.from_numpy(onehot_datas))
-    test_dataset = torch.utils.data.TensorDataset(torch.from_numpy(X_test_datas), torch.from_numpy(test_label_datas),  torch.from_numpy(onehot_test_datas))
+#     X_test_datas = np.array(numpy_test)
+#     print(X_test_datas.shape)
+#     test_label_datas = np.array(numpy_label_test)
+#     print(test_label_datas.shape)
+#     onehot_test_datas = np.array(numpy_onehot_test)
+#     print(onehot_test_datas.shape)
+#     #make train, test dataset
+#     train_dataset = torch.utils.data.TensorDataset(torch.from_numpy(X_datas), torch.from_numpy(label_datas), torch.from_numpy(onehot_datas))
+#     test_dataset = torch.utils.data.TensorDataset(torch.from_numpy(X_test_datas), torch.from_numpy(test_label_datas),  torch.from_numpy(onehot_test_datas))
     
-    return train_dataset, test_dataset
+#     return train_dataset, test_dataset
 
 if __name__ == '__main__':
     Package_Data_onehot_Slice_Loder(1)
