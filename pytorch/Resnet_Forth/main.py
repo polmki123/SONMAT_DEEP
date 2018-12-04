@@ -31,7 +31,7 @@ def main(main_model_dir, korean_model_dir, number):
     # train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
     # test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
 
-    train_Data, test_Data = utils.Package_Data_onehot_Slice_Loder(number)
+    train_Data, test_Data = utils.Test_Data_onehot_Slice_Loder(number)
     
     train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
     test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
@@ -121,7 +121,7 @@ def train(model, optimizer, criterion_MSE, criterion_Cross, train_loader, epoch)
                   .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2 , 100. * correct / total, correct, total))
             
         
-def test(model, criterion_MSE, criterion_Cross_last , test_loader, epoch):
+def test(model, criterion_MSE, criterion_Cross , test_loader, epoch):
     model.eval()
     print_loss = 0
     print_loss2 = 0  
@@ -150,7 +150,7 @@ def test(model, criterion_MSE, criterion_Cross_last , test_loader, epoch):
                   .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2 , 100. * correct / total, correct, total))
 
 
-def setting_data(data, target):
+def setting_data(data, target, onehot_target):
     data = data.type(torch.cuda.FloatTensor)
     target = target.type(torch.cuda.FloatTensor)
     onehot_target = onehot_target.type(torch.cuda.LongTensor)
