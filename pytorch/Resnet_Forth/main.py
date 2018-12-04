@@ -19,7 +19,7 @@ from collections import OrderedDict
 os.environ["CUDA_VISIBLE_DEVICES"] = '6'
 
 def main(main_model_dir, korean_model_dir, number):
-    utils.default_model_dir = os.path.join(main_model_dir, '/model/')
+    utils.default_model_dir = main_model_dir + '/model/'
     BATCH_SIZE = 128
     lr = 0.0002
     EPOCH = 200 
