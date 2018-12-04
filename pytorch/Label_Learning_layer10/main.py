@@ -19,7 +19,7 @@ def main(model_dir, number):
     utils.default_model_dir = model_dir
     BATCH_SIZE = 128
     lr = 0.01
-    EPOCH = 200
+    EPOCH = 100
     start_epoch = 0
     train_Data, test_Data = utils.font_data_onehot_Slice_Loder()
     
@@ -145,6 +145,6 @@ def do_learning(model_dir, number):
 
 if __name__ == '__main__':
     print(str(0)+'for train')
-    model_dir = './model/'
-    do_learning(model_dir, 0)
+    main_model_dir = '/data2/hhjung/Sonmat_Result/Resnet_Forth_pretrain'
+    do_learning(main_model_dir, 0)
         
