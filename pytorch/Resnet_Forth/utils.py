@@ -52,9 +52,9 @@ def input_Deepmodel_image(inputimagedir, frame_dir):
     
 #     return input_data
 
-def check_model_result_image(epoch, model, number):
+def check_model_result_image(epoch, model, number, model_dir):
     if epoch % 10 == 0:
-        saveimagedir = '/data2/hhjung/Sonmat_Result/Resnet_Forth/result_image/' + str(number) + '/' + str(epoch) + '/'
+        saveimagedir = os.path.join(model_dir, 'result_image', str(number), str(epoch) )
         inputimagedir = '/data2/hhjung/Conpress_Son/test1.jpg'
         input_data = input_Deepmodel_image(inputimagedir)
         model.eval()
