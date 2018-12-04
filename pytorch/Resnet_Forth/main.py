@@ -72,7 +72,7 @@ def main(main_model_dir, korean_model_dir, number):
     if not korean_checkpoint:
         pass
     else:
-
+        pass
     # for epoch in range(start_epoch, EPOCH+1):
     #     if epoch < 100:
     #         learning_rate = lr

@@ -195,7 +195,7 @@ def font_data_onehot_Slice_Loder():
     return train_dataset, test_dataset
 
 def Package_Data_onehot_Slice_Loder(number):
-	data_dir = '/data2/hhjung/Conpress_Son/'
+    data_dir = '/data2/hhjung/Conpress_Son/'
     # read train data
     numpy_x = list()
     numpy_label = list()
