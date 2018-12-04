@@ -16,7 +16,7 @@ import main_model
 from collections import OrderedDict
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = '6'
+os.environ["CUDA_VISIBLE_DEVICES"] = '7'
 
 def main(main_model_dir, korean_model_dir, number):
     utils.default_model_dir = main_model_dir + '/model/'
@@ -168,7 +168,7 @@ if __name__ == '__main__':
     print('Dataset numper is {}'.format(dataset_num))
 
     korean_model_dir = '/data2/hhjung/Sonmat_Result/Label_Learning/model'
-    main_model_dir = '/data2/hhjung/Sonmat_Result/Resnet_Forth' 
+    main_model_dir = '/data2/hhjung/Sonmat_Result/Resnet_Forth_GPU{}'.format(7) 
 
     do_learning(main_model_dir, korean_model_dir, dataset_num)
         
