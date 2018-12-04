@@ -67,7 +67,7 @@ def main(model_dir, number):
     
         train(model, optimizer, criterion_Cross, train_loader, epoch)
         test(model, criterion_Cross, test_loader, epoch)
-        utils.save_model_checkpoint(epoch, model, model_dir, optimizer)
+        utils.save_model_checkpoint(epoch, model, utils.default_model_dir, optimizer)
 
         
     # utils.conv_weight_L1_printing(model.module)
