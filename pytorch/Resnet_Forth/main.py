@@ -18,61 +18,60 @@ from collections import OrderedDict
 
 os.environ["CUDA_VISIBLE_DEVICES"] = '6'
 
-def main(model_dir, number):
-    utils.default_model_dir = model_dir
+def main(main_model_dir, korean_model_dir, number):
+    utils.default_model_dir = os.path.join(main_model_dir, 'model')
     BATCH_SIZE = 128
     lr = 0.0002
     EPOCH = 200 
     start_epoch = 0
-    # train_Data, test_Data = utils.font_data_onehot_Slice_Loder()
+    start_time = time.time()
+
+    train_Data, test_Data = utils.font_data_onehot_Slice_Loder()
     
-    # train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
-    # test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
+    train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
+    test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
+
+    criterion_Cross = nn.CrossEntropyLoss().cuda()
     
     label_model = ResNet()
+    korean_checkpoint = utils.load_checkpoint(korean_model_dir)
+    new_state_dict = OrderedDict()
+    for k, v in korean_checkpoint['state_dict'].items():
+        name = k[7:] # remove `module.`
+        new_state_dict[name] = v
+    label_model.load_state_dict(new_state_dict)
 
-    start_time = time.time()
-    
+    test(label_model, criterion_Cross, test_loader, 200)
+    utils.init_learning(label_model)
+
+    print('conv1.weight.requires_grad', label_model.conv1.weight.requires_grad)
+
+    model = main_model.ResNet(pretrained=label_model)
+
+    print('pretrained.conv1.weight.requires_grad', model.pretrained.conv1.weight.requires_grad)
+
+
+
+
+
     if torch.cuda.is_available():
         # os.environ["CUDA_VISIBLE_DEVICES"] = '0'
         print("USE", torch.cuda.device_count(), "GPUs!")
-        # model = nn.DataParallel(model).cuda()
-        # cudnn.benchmark = True
+        model = nn.DataParallel(model).cuda()
+        cudnn.benchmark = True
 
     else:
         print("NO GPU -_-;")
         
-    # Loss and Optimizer
-    optimizer = torch.optim.Adam(label_model.parameters(), lr=lr)
-    criterion_Cross = nn.CrossEntropyLoss().cuda()
-    
-    #load checkpoint
-    checkpoint = utils.load_checkpoint(model_dir)
-    
-    if not checkpoint:
-        pass
-    else:
-        start_epoch = checkpoint['epoch'] + 1
-        # label_model.load_state_dict(checkpoint['state_dict'])
-        optimizer.load_state_dict(checkpoint['optimizer'])
 
-        new_state_dict = OrderedDict()
-        for k, v in checkpoint['state_dict'].items():
-            name = k[7:] # remove `module.`
-            new_state_dict[name] = v
-        label_model.load_state_dict(new_state_dict)
-
-        model = main_model.ResNet(pretrained=label_model)
-
-        print('MODEL', model)
-        print('LABEL_MODEL', label_model)
-        print(start_epoch)
-
-    model = nn.DataParallel(model).cuda()
     print('MODEL_', model)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion_Cross = nn.CrossEntropyLoss().cuda()
+
+    if not korean_checkpoint:
+        pass
+    else:
 
     # for epoch in range(start_epoch, EPOCH+1):
     #     if epoch < 100:
@@ -86,7 +85,7 @@ def main(model_dir, number):
     
     #     train(model, optimizer, criterion_Cross, train_loader, epoch)
     #     test(model, criterion_Cross, test_loader, epoch)
-    #     utils.save_model_checkpoint(epoch, model, model_dir, optimizer)
+    #     utils.save_model_checkpoint(epoch, model, main_model_dir, optimizer)
 
         
     # utils.conv_weight_L1_printing(model.module)
@@ -159,14 +158,17 @@ def setting_data(data, target):
     return data, target
 
 
-def do_learning(model_dir, number):
-    main(model_dir, number)
+def do_learning(main_model_dir, korean_model_dir, number):
+    main(main_model_dir, korean_model_dir, number)
 
 if __name__ == '__main__':
-    print(str(0)+'for train')
-    model_dir = '/data2/hhjung/Sonmat_Result/Label_Learning/model'
-    # '/data2/hhjung/Sonmat_Result/Resnet_Forth/model'
 
+    dataset_num = 0
 
-    do_learning(model_dir, 0)
+    print('Dataset numper is {}'.format(dataset_num))
+
+    korean_model_dir = '/data2/hhjung/Sonmat_Result/Label_Learning/model'
+    main_model_dir = '/data2/hhjung/Sonmat_Result/Resnet_Forth' 
+
+    do_learning(main_model_dir, korean_model_dir, dataset_num)
         

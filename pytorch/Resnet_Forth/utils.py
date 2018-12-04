@@ -13,6 +13,21 @@ import math
 import PIL.ImageOps
 default_model_dir = "./"
 
+def get_num_gen(gen):
+    return sum(1 for x in gen)
+
+def is_leaf(model):
+    return get_num_gen(model.children()) == 0
+
+def init_learning(model):
+    for child in model.children():
+        if is_leaf(child):
+            if hasattr(child, 'weight'):
+                child.weight.requires_grad = False
+                # print('True', child)
+        else:
+            init_learning(child)
+
 def save_model_checkpoint(epoch, model, model_dir, optimizer):
     if epoch % 20 == 0:
         model_filename = os.path.join(model_dir, 'checkpoint_%02d.pth.tar' % epoch)
@@ -37,20 +52,6 @@ def input_Deepmodel_image(inputimagedir, frame_dir):
             input_data.append(Concat_data)
     
     return input_data
-
-# def input_Deepmodel2_image(inputimagedir, frame_dir ):
-#     frame_dir = '/data2/hhjung/Conpress_Son/frame_label/'
-#     frame_paths = glob.glob(os.path.join(frame_dir, '*.jpg'))
-#     input_paths = glob.glob(os.path.join(inputimagedir, '*.png'))
-#     input_data = list()
-#     for i in range(len(frame_paths)):
-#         frame_image = np.array(Image.open(frame_paths[i])).reshape(1, 64, 64)
-#         input_image = np.array(Image.open(input_paths[i])).reshape(1, 64, 64)
-#         Concat_data = np.append(input_image, frame_image, axis=0)# 2*64*64
-#         if ((2, 64, 64) == Concat_data.shape):
-#             input_data.append(Concat_data)
-    
-#     return input_data
 
 def check_model_result_image(epoch, model, number, model_dir):
     if epoch % 10 == 0:
@@ -77,34 +78,6 @@ def check_model_result_image(epoch, model, number, model_dir):
             if not os.path.exists(saveimagedir):
                 os.makedirs(saveimagedir)
             img.save(saveimagedir + str(check_point) + 'my.jpg')
-
-
-# def check_model2_result_image(epoch, model, number):
-#     if epoch % 10 == 0:
-#         saveimagedir = '/data2/hhjung/Sonmat_Result/Resnet_Forth/result_image/' + str(number) + '/' + str(epoch) + '/'
-#         inputimagedir = '/data2/hhjung/Conpress_Son/test1.jpg'
-#         input_data = input_Deepmodel2_image(inputimagedir)
-#         model.eval()
-#         check_point = 0
-#         for i in input_data:
-#             check_point = check_point + 1
-#             i = np.array(i)
-#             i = i.reshape(1, 2, 64, 64)
-#             input = torch.from_numpy(i)
-#             input = Variable(input.cuda())
-#             input = input.type(torch.cuda.FloatTensor)
-#             input = normalize_image(input)
-#             output = model(input)
-#             output = Variable(output[1]).data.cpu().numpy()
-#             output = output.reshape(64, 64)
-#             # print(output)
-#             output = renormalize_image(output)
-#             output = normalize_function(output)
-#             img = Image.fromarray(output.astype('uint8'), 'L')
-#             img = PIL.ImageOps.invert(img)
-#             if not os.path.exists(saveimagedir):
-#                 os.makedirs(saveimagedir)
-#             img.save(saveimagedir + str(check_point) + 'my.jpg')
             
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
