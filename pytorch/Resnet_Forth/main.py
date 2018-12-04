@@ -41,7 +41,9 @@ def main(main_model_dir, korean_model_dir, number):
         new_state_dict[name] = v
     label_model.load_state_dict(new_state_dict)
 
-    test(label_model, criterion_Cross, test_loader, 200)
+    test_model = nn.DataParallel(label_model).cuda()
+
+    test(test_model, criterion_Cross, test_loader, 200)
     utils.init_learning(label_model)
 
     print('conv1.weight.requires_grad', label_model.conv1.weight.requires_grad)
