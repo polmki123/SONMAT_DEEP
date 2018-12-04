@@ -121,7 +121,7 @@ def train(model, optimizer, criterion_MSE, criterion_Cross, train_loader, epoch)
                   .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2 , 100. * correct / total, correct, total))
             
         
-def test(model, criterion_MSE, criterion_Cross_last , test_loader, epoch):
+def test(model, criterion_MSE, criterion_Cross , test_loader, epoch):
     model.eval()
     print_loss = 0
     print_loss2 = 0  
