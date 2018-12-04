@@ -13,6 +13,12 @@ import math
 import PIL.ImageOps
 default_model_dir = "./"
 
+
+def make_one_hot() :
+    a = np.array([a for a in range(2350)])
+    return a
+
+    
 def get_num_gen(gen):
     return sum(1 for x in gen)
 
