@@ -90,7 +90,7 @@ def main(main_model_dir, korean_model_dir, number):
 
 # Train the model
 def train(model, optimizer, criterion_MSE, criterion_Cross, train_loader, epoch):
-    odel.train()
+    model.train()
     print_loss = 0
     print_loss2 = 0  
     total = 0
