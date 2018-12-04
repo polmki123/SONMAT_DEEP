@@ -19,7 +19,7 @@ from collections import OrderedDict
 os.environ["CUDA_VISIBLE_DEVICES"] = '6'
 
 def main(main_model_dir, korean_model_dir, number):
-    utils.default_model_dir = main_model_dir + '/model/'
+    utils.default_model_dir = os.path.join(main_model_dir, 'model')
     BATCH_SIZE = 128
     lr = 0.0002
     EPOCH = 200 
@@ -31,7 +31,7 @@ def main(main_model_dir, korean_model_dir, number):
     # train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
     # test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
 
-    train_Data, test_Data = utils.Test_Data_onehot_Slice_Loder(number)
+    train_Data, test_Data = utils.Package_Data_onehot_Slice_Loder(number)
     
     train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
     test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
