@@ -35,7 +35,7 @@ def init_learning(model):
             init_learning(child)
 
 def save_model_checkpoint(epoch, model, model_dir, optimizer):
-    if epoch % 5 == 0:
+    if epoch % 20 == 0:
         model_filename = 'checkpoint_%02d.pth.tar' % epoch
         save_checkpoint({
             'epoch': epoch,
@@ -60,7 +60,7 @@ def input_Deepmodel_image(inputimagedir):
     return input_data
 
 def check_model_result_image(epoch, model, number, model_dir):
-    if epoch % 10 == 0:
+    if epoch % 5 == 0:
         saveimagedir = model_dir + '/result_image/' + str(number) + '/' + str(epoch) + '/'
         inputimagedir = '/data2/hhjung/Conpress_Son/test1.jpg'
         input_data = input_Deepmodel_image(inputimagedir)
