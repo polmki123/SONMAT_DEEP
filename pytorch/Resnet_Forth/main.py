@@ -81,7 +81,7 @@ def main(main_model_dir, korean_model_dir, number):
     
         train(model, optimizer, criterion_MSE, criterion_Cross, train_loader, epoch)
         test(model, criterion_MSE, criterion_Cross, test_loader, epoch)
-        utils.save_model_checkpoint(epoch, model, main_model_dir, optimizer)
+        utils.save_model_checkpoint(epoch, model, utils.default_model_dir, optimizer)
         utils.check_model_result_image(epoch, model, number, main_model_dir)
 
     now = time.gmtime(time.time() - start_time)
