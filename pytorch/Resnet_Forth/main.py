@@ -26,10 +26,10 @@ def main(main_model_dir, korean_model_dir, number):
     start_epoch = 0
     start_time = time.time()
 
-    train_Data, test_Data = utils.font_data_onehot_Slice_Loder()
+    # train_Data, test_Data = utils.font_data_onehot_Slice_Loder()
     
-    train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
-    test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
+    # train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
+    # test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
 
     criterion_Cross = nn.CrossEntropyLoss().cuda()
     
@@ -40,17 +40,12 @@ def main(main_model_dir, korean_model_dir, number):
         name = k[7:] # remove `module.`
         new_state_dict[name] = v
     label_model.load_state_dict(new_state_dict)
-
-    test_model = nn.DataParallel(label_model).cuda()
-
-    test(test_model, criterion_Cross, test_loader, 200)
     utils.init_learning(label_model)
 
-    print('conv1.weight.requires_grad', label_model.conv1.weight.requires_grad)
+
 
     model = main_model.ResNet(pretrained=label_model)
 
-    print('pretrained.conv1.weight.requires_grad', model.pretrained.conv1.weight.requires_grad)
 
 
 
