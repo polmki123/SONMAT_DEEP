@@ -50,25 +50,23 @@ def main(main_model_dir, korean_model_dir, number):
     model = main_model.ResNet(pretrained=label_model)
 
     if torch.cuda.is_available():
-        # os.environ["CUDA_VISIBLE_DEVICES"] = '0'
         print("USE", torch.cuda.device_count(), "GPUs!")
         model = nn.DataParallel(model).cuda()
         cudnn.benchmark = True
-
     else:
         print("NO GPU -_-;")
         
-
-    print('MODEL_', model)
-
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion_Cross = nn.CrossEntropyLoss().cuda()
     criterion_MSE = nn.MSELoss().cuda()
 
-    if not korean_checkpoint:
+    checkpoint = utils.load_checkpoint(utils.default_model_dir)
+    if not checkpoint:
         pass
     else:
-        pass
+        start_epoch = checkpoint['epoch'] + 1
+        model.load_state_dict(checkpoint['state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer'])
 
     # start train    
     for epoch in range(start_epoch, EPOCH+1):
@@ -86,8 +84,6 @@ def main(main_model_dir, korean_model_dir, number):
         utils.save_model_checkpoint(epoch, model, main_model_dir, optimizer)
         utils.check_model_result_image(epoch, model, number, main_model_dir)
 
-        
-    # utils.conv_weight_L1_printing(model.module)
     now = time.gmtime(time.time() - start_time)
     print('{} hours {} mins {} secs for training'.format(now.tm_hour, now.tm_min, now.tm_sec))
 

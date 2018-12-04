@@ -29,7 +29,7 @@ def init_learning(model):
             init_learning(child)
 
 def save_model_checkpoint(epoch, model, model_dir, optimizer):
-    if epoch % 20 == 0:
+    if epoch % 5 == 0:
         model_filename = os.path.join(model_dir, 'checkpoint_%02d.pth.tar' % epoch)
         save_checkpoint({
             'epoch': epoch,
