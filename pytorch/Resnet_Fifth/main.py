@@ -129,9 +129,9 @@ def test(model, criterion_MSE, test_loader, epoch):
         image_loss = criterion_MSE(output, target)
         print_loss += image_loss.item()
         if batch_idx % 10 == 0:
-            utils.print_log('Epoch: {} | Batch: {}  | image_Loss: ({:.4f}) | Best label epoch : {} | Best Acc: ({:.2f}%)'
+            utils.print_log('Test# Epoch: {} | Batch: {}  | image_Loss: ({:.4f}) | Best label epoch : {} | Best Acc: ({:.2f}%)'
                   .format(epoch, batch_idx, print_loss, cross_epoch, cross_correct ))
-            print('Epoch: {} | Batch: {}  | image_Loss: ({:.4f}) | Best label epoch : {} | Best Acc: ({:.2f}%)'
+            print('Test# Epoch: {} | Batch: {}  | image_Loss: ({:.4f}) | Best label epoch : {} | Best Acc: ({:.2f}%)'
                   .format(epoch, batch_idx, print_loss, cross_epoch, cross_correct ))
 
 
