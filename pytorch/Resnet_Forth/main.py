@@ -21,7 +21,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = '6'
 def main(main_model_dir, korean_model_dir, number):
     utils.default_model_dir = main_model_dir + '/model/'
     BATCH_SIZE = 128
-    lr = 0.005
+    lr = 0.001
     EPOCH = 200 
     start_epoch = 0
     start_time = time.time()
