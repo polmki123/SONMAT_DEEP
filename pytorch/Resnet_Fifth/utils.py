@@ -95,6 +95,8 @@ def check_model_result_image_crossloss(epoch, model, label_model, number, model_
             main.cross_epoch = epoch
             main.cross_correct = correct
 
+        
+
 
 def label_model_process(epoch, label_data_set, label_model, test_data_set):
     label_model.eval()
@@ -117,9 +119,9 @@ def label_model_process(epoch, label_data_set, label_model, test_data_set):
         _, predicted = torch.max(output.data, 1)
         total += target.size(0)
         correct += predicted.eq(target.data).sum()
-        if batch_idx % 5 == 0:
-            print('# TEST : Epoch: {} | Batch: {} | Acc: ({:.2f}%) ({}/{})'
-                  .format(epoch, batch_idx, 100. * correct / total, correct, total))
+        # if batch_idx % 5 == 0:
+        #     print('# TEST : Epoch: {} | Batch: {} | Acc: ({:.2f}%) ({}/{})'
+        #           .format(epoch, batch_idx, 100. * correct / total, correct, total))
     return correct
 
 
