@@ -31,7 +31,7 @@ def main(main_model_dir, korean_model_dir, number):
     train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
     test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
 
-    label_model = ResNet()
+    
     
     # new_state_dict = OrderedDict()
     # for k, v in korean_checkpoint['state_dict'].items():
@@ -41,10 +41,11 @@ def main(main_model_dir, korean_model_dir, number):
     # utils.init_learning(label_model)
 
     model = main_model.ResNet()
+    label_model = ResNet()
 
     if torch.cuda.is_available():
         print("USE", torch.cuda.device_count(), "GPUs!")
-        label_model = nn.DatasetParallel(label_model).cuda()
+        label_model = nn.DataParallel(label_model).cuda()
         model = nn.DataParallel(model).cuda()
         cudnn.benchmark = True
     else:
