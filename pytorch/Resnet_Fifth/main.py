@@ -15,10 +15,14 @@ from model import *
 import main_model
 from collections import OrderedDict
 
-
+cross_epoch = 0
+cross_correct = 0
 os.environ["CUDA_VISIBLE_DEVICES"] = '6'
 
 def main(main_model_dir, korean_model_dir, number):
+	# global cross_epoch
+ #    global cross_correct
+    
     utils.default_model_dir = main_model_dir + '/model/'
     BATCH_SIZE = 64
     lr = 0.001
@@ -156,10 +160,8 @@ def do_learning(main_model_dir, korean_model_dir, number):
     main(main_model_dir, korean_model_dir, number)
 
 if __name__ == '__main__':
-    global cross_epoch
-    global cross_correct
-    cross_epoch = 0
-    cross_correct = 0
+    
+    
     dataset_num = 1
 
     print('Dataset numper is {}'.format(dataset_num))
