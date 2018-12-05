@@ -104,10 +104,10 @@ def train(model, optimizer, criterion_MSE, train_loader, epoch):
         optimizer.step()
         print_loss += image_loss.item()
         if batch_idx % 10 == 0:
-            utils.print_log('Epoch: {} | Batch: {}  | image_Loss: ({:.4f})'
-                  .format(epoch, batch_idx, print_loss ))
-            print('Epoch: {} | Batch: {}  | image_Loss: ({:.4f})'
-                  .format(epoch, batch_idx, print_loss ))
+            utils.print_log('Epoch: {} | Batch: {}  | image_Loss: ({:.4f}) | Best label epoch : {} | Best Acc: ({:.2f}%)'
+                  .format(epoch, batch_idx, print_loss, cross_epoch, cross_correct ))
+            print('Epoch: {} | Batch: {}  | image_Loss: ({:.4f}) | Best label epoch : {} | Best Acc: ({:.2f}%)'
+                  .format(epoch, batch_idx, print_loss, cross_epoch, cross_correct ))
             
         
 def test(model, criterion_MSE, criterion_Cross , test_loader, epoch):
@@ -126,10 +126,10 @@ def test(model, criterion_MSE, criterion_Cross , test_loader, epoch):
         image_loss = criterion_MSE(output, target)
         print_loss += image_loss.item()
         if batch_idx % 10 == 0:
-            utils.print_log('Epoch: {} | Batch: {}  | image_Loss: ({:.4f})'
-                  .format(epoch, batch_idx, print_loss ))
-            print('Epoch: {} | Batch: {}  | image_Loss: ({:.4f})'
-                  .format(epoch, batch_idx, print_loss ))
+            utils.print_log('Epoch: {} | Batch: {}  | image_Loss: ({:.4f}) | Best label epoch : {} | Best Acc: ({:.2f}%)'
+                  .format(epoch, batch_idx, print_loss, cross_epoch, cross_correct ))
+            print('Epoch: {} | Batch: {}  | image_Loss: ({:.4f}) | Best label epoch : {} | Best Acc: ({:.2f}%)'
+                  .format(epoch, batch_idx, print_loss, cross_epoch, cross_correct ))
 
 
         # print_loss += Cross_Loss.item()
@@ -153,10 +153,10 @@ def do_learning(main_model_dir, korean_model_dir, number):
     main(main_model_dir, korean_model_dir, number)
 
 if __name__ == '__main__':
-    global epoch
-    global correct
-    epoch = 0
-    correct = 0
+    global cross_epoch
+    global cross_correct
+    cross_epoch = 0
+    cross_correct = 0
     dataset_num = 1
 
     print('Dataset numper is {}'.format(dataset_num))
