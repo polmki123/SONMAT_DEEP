@@ -82,7 +82,6 @@ def check_model_result_image_crossloss(epoch, model, label_model, number, model_
             output = output.reshape(64, 64)
             # print(output)
             output =renormalize_image(output)
-            test_data_set
             img = Image.fromarray(output.astype('uint8'), 'L')
             #img = PIL.ImageOps.invert(img)
             if not os.path.exists(saveimagedir):
