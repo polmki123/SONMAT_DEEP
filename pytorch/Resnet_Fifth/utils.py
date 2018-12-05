@@ -11,6 +11,7 @@ import gzip
 import random
 import math
 import PIL.ImageOps
+import main
 default_model_dir = "./"
 
 
