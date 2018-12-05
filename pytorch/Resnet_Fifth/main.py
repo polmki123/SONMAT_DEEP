@@ -34,9 +34,9 @@ def main(main_model_dir, korean_model_dir, number):
     label_model = ResNet()
     korean_checkpoint = utils.load_checkpoint(korean_model_dir)
     new_state_dict = OrderedDict()
-    for k, v in korean_checkpoint['state_dict'].items():
-        name = k[7:] # remove `module.`
-        new_state_dict[name] = v
+    # for k, v in korean_checkpoint['state_dict'].items():
+    #     name = k[7:] # remove `module.`
+    #     new_state_dict[name] = v
     label_model.load_state_dict(new_state_dict)
     # utils.init_learning(label_model)
 
