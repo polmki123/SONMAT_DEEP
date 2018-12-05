@@ -32,12 +32,12 @@ def main(main_model_dir, korean_model_dir, number):
     test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
 
     label_model = ResNet()
-    korean_checkpoint = utils.load_checkpoint(korean_model_dir)
+    
     # new_state_dict = OrderedDict()
     # for k, v in korean_checkpoint['state_dict'].items():
     #     name = k[7:] # remove `module.`
     #     new_state_dict[name] = v
-    label_model.load_state_dict(korean_checkpoint['state_dict'])
+
     # utils.init_learning(label_model)
 
     model = main_model.ResNet()
@@ -50,6 +50,8 @@ def main(main_model_dir, korean_model_dir, number):
     else:
         print("NO GPU -_-;")
         
+    korean_checkpoint = utils.load_checkpoint(korean_model_dir)
+    label_model.load_state_dict(korean_checkpoint['state_dict'])
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     # criterion_Cross = nn.CrossEntropyLoss().cuda()
     criterion_MSE = nn.MSELoss().cuda()
