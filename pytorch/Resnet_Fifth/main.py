@@ -26,7 +26,7 @@ def main(main_model_dir, korean_model_dir, number):
     start_epoch = 0
     start_time = time.time()
 
-    train_Data, test_Data = utils.Package_Data_Slice_Loder(number)
+    train_Data, test_Data = utils.Test_Data_Slice_Loder(number)
     
     train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
     test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)

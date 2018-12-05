@@ -419,5 +419,32 @@ def Test_Data_onehot_Slice_Loder(number):
     
     return train_dataset, test_dataset
 
+
+def Test_Data_Slice_Loder(number):
+    # read train data
+    numpy_x = np.random.rand(2350,9,64,64)
+    numpy_label = np.random.rand(2350,1,64,64)
+    
+    X_datas = np.array(numpy_x)
+    print(X_datas.shape)
+    label_datas = np.array(numpy_label)
+    print(label_datas.shape)
+
+
+    # read test data
+    numpy_test = np.random.rand(2350,9,64,64)
+    numpy_label_test = np.random.rand(2350,1,64,64)
+    
+    X_test_datas = np.array(numpy_test)
+    print(X_test_datas.shape)
+    test_label_datas = np.array(numpy_label_test)
+    print(test_label_datas.shape)
+
+    #make train, test dataset
+    train_dataset = torch.utils.data.TensorDataset(torch.from_numpy(X_datas), torch.from_numpy(label_datas))
+    test_dataset = torch.utils.data.TensorDataset(torch.from_numpy(X_test_datas), torch.from_numpy(test_label_datas))
+    
+    return train_dataset, test_dataset
+
 if __name__ == '__main__':
     Package_Data_onehot_Slice_Loder(1)
