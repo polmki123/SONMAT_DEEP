@@ -77,7 +77,7 @@ def main(main_model_dir, korean_model_dir, number):
             param_group['lr'] = learning_rate
     
         train(model, optimizer, criterion_MSE, train_loader, epoch)
-        test(model, criterion_MSE, criterion_Cross, test_loader, epoch)
+        test(model, criterion_MSE, test_loader, epoch)
         utils.save_model_checkpoint(epoch, model, utils.default_model_dir, optimizer)
         utils.check_model_result_image_crossloss(epoch, model, label_model, number, main_model_dir)
 
@@ -113,7 +113,7 @@ def train(model, optimizer, criterion_MSE, train_loader, epoch):
                   .format(epoch, batch_idx, print_loss, cross_epoch, cross_correct ))
             
         
-def test(model, criterion_MSE, criterion_Cross , test_loader, epoch):
+def test(model, criterion_MSE, test_loader, epoch):
     model.eval()
     print_loss = 0
     total = 0
