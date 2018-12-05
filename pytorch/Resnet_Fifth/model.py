@@ -57,7 +57,7 @@ class ResNet(nn.Module):
         self.conv1 = nn.Conv2d(1, 64, kernel_size=3, stride=2, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
-        self.n = 9
+        self.n = 2
         # 64 32 32
         self.layer1 = nn.Sequential()
         self.layer1.add_module('layer1_0', BasicBlock(in_channels=64, out_channels=64, stride=1, downsample=None))
