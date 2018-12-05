@@ -26,12 +26,7 @@ def main(main_model_dir, korean_model_dir, number):
     start_epoch = 0
     start_time = time.time()
 
-    # train_Data, test_Data = utils.font_data_onehot_Slice_Loder()
-    
-    # train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
-    # test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
-
-    train_Data, test_Data = utils.Package_Data_onehot_Slice_Loder(number)
+    train_Data, test_Data = utils.Package_Data_Slice_Loder(number)
     
     train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
     test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
@@ -43,21 +38,20 @@ def main(main_model_dir, korean_model_dir, number):
         name = k[7:] # remove `module.`
         new_state_dict[name] = v
     label_model.load_state_dict(new_state_dict)
-    utils.init_learning(label_model)
+    # utils.init_learning(label_model)
 
-
-
-    model = main_model.ResNet(pretrained=label_model)
+    model = main_model.ResNet()
 
     if torch.cuda.is_available():
         print("USE", torch.cuda.device_count(), "GPUs!")
+        label_model = nn.DatasetParallel(label_model).cuda()
         model = nn.DataParallel(model).cuda()
         cudnn.benchmark = True
     else:
         print("NO GPU -_-;")
         
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    criterion_Cross = nn.CrossEntropyLoss().cuda()
+    # criterion_Cross = nn.CrossEntropyLoss().cuda()
     criterion_MSE = nn.MSELoss().cuda()
 
     checkpoint = utils.load_checkpoint(utils.default_model_dir)
@@ -79,95 +73,95 @@ def main(main_model_dir, korean_model_dir, number):
         for param_group in optimizer.param_groups:
             param_group['lr'] = learning_rate
     
-        train(model, optimizer, criterion_MSE, criterion_Cross, train_loader, epoch)
+        train(model, optimizer, criterion_MSE, train_loader, epoch)
         test(model, criterion_MSE, criterion_Cross, test_loader, epoch)
         utils.save_model_checkpoint(epoch, model, utils.default_model_dir, optimizer)
-        utils.check_model_result_image(epoch, model, number, main_model_dir)
+        utils.check_model_result_image_crossloss(epoch, model, label_model, number, main_model_dir)
 
     now = time.gmtime(time.time() - start_time)
     print('{} hours {} mins {} secs for training'.format(now.tm_hour, now.tm_min, now.tm_sec))
 
 
 # Train the model
-def train(model, optimizer, criterion_MSE, criterion_Cross, train_loader, epoch):
+def train(model, optimizer, criterion_MSE, train_loader, epoch):
     model.train()
     print_loss = 0
-    print_loss2 = 0  
     total = 0
     correct = 0
-    for batch_idx, (data, target, onehot_target) in enumerate(train_loader):
+    for batch_idx, (data, target) in enumerate(train_loader):
         if torch.cuda.is_available():
-            data, target, onehot_target = Variable(data.cuda()), Variable(target.cuda()), Variable(onehot_target.cuda())
+            data, target = Variable(data.cuda()), Variable(target.cuda())
         else:
-            data, target, onehot_target  = Variable(data), Variable(target), Variable(onehot_target)
+            data, target = Variable(data), Variable(target)
             
-        data, target, onehot_target = setting_data(data, target, onehot_target)
+        data, target = setting_data(data, target)
         optimizer.zero_grad()
         output = model(data)
-        Cross_Loss = criterion_Cross(output[1], onehot_target)
-        image_loss = criterion_MSE(output[0], target)
-        Cross_Loss.backward(retain_graph=True)
-        image_loss.backward(retain_graph=True)
+        image_loss = criterion_MSE(output, target)
+        # Cross_Loss.backward(retain_graph=True)
+        # image_loss.backward(retain_graph=True)
+        image_loss.backward()
         optimizer.step()
-        print_loss += Cross_Loss.item()
-        print_loss2 += image_loss.item()
-        _, predicted = torch.max(output[1].data, 1)
-        total += target.size(0)
-        correct += predicted.eq(onehot_target.data).sum()
+        print_loss += image_loss.item()
         if batch_idx % 10 == 0:
-            utils.print_log('Epoch: {} | Batch: {} |  Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
-                  .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2 , 100. * correct / total, correct, total))
-            print('Epoch: {} | Batch: {} |  Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
-                  .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2 , 100. * correct / total, correct, total))
+            utils.print_log('Epoch: {} | Batch: {}  | image_Loss: ({:.4f})'
+                  .format(epoch, batch_idx, print_loss ))
+            print('Epoch: {} | Batch: {}  | image_Loss: ({:.4f})'
+                  .format(epoch, batch_idx, print_loss ))
             
         
 def test(model, criterion_MSE, criterion_Cross , test_loader, epoch):
     model.eval()
     print_loss = 0
-    print_loss2 = 0  
     total = 0
     correct = 0
-    for batch_idx, (data, target, onehot_target) in enumerate(test_loader):
+    for batch_idx, (data, target) in enumerate(test_loader):
         if torch.cuda.is_available():
-            data, target, onehot_target = Variable(data.cuda()), Variable(target.cuda()), Variable(onehot_target.cuda())
+            data, target = Variable(data.cuda()), Variable(target.cuda())
         else:
-            data, target, onehot_target = Variable(data), Variable(target), Variable(onehot_target)
+            data, target = Variable(data), Variable(target)
             
-        data, target, onehot_target = setting_data(data, target, onehot_target)
+        data, target = setting_data(data, target)
         output = model(data)
-        Cross_Loss = criterion_Cross(output[1], onehot_target )
-        image_loss = criterion_MSE(output[0], target)
-        
-        print_loss += Cross_Loss.item()
-        print_loss2 += image_loss.item()
-        _, predicted = torch.max(output[1].data, 1)
-        total += target.size(0)
-        correct += predicted.eq(onehot_target.data).sum()
+        image_loss = criterion_MSE(output, target)
+        print_loss += image_loss.item()
         if batch_idx % 10 == 0:
-            utils.print_log('# TEST : Epoch: {} | Batch: {} |  Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
-                  .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2 , 100. * correct / total, correct, total))
-            print('# TEST : Epoch: {} | Batch: {} |  Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
-                  .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2 , 100. * correct / total, correct, total))
+            utils.print_log('Epoch: {} | Batch: {}  | image_Loss: ({:.4f})'
+                  .format(epoch, batch_idx, print_loss ))
+            print('Epoch: {} | Batch: {}  | image_Loss: ({:.4f})'
+                  .format(epoch, batch_idx, print_loss ))
 
 
-def setting_data(data, target, onehot_target):
+        # print_loss += Cross_Loss.item()
+        # print_loss2 += image_loss.item()
+        # _, predicted = torch.max(output[1].data, 1)
+        # total += target.size(0)
+        # correct += predicted.eq(onehot_target.data).sum()
+        # if batch_idx % 10 == 0:
+        #     utils.print_log('# TEST : Epoch: {} | Batch: {} |  Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
+        #           .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2 , 100. * correct / total, correct, total))
+        #     print('# TEST : Epoch: {} | Batch: {} |  Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
+        #           .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2 , 100. * correct / total, correct, total))
+
+
+def setting_data(data, target):
     data = data.type(torch.cuda.FloatTensor)
     target = target.type(torch.cuda.FloatTensor)
-    onehot_target = onehot_target.type(torch.cuda.LongTensor)
-    onehot_target = torch.squeeze(onehot_target)
-    return data, target, onehot_target
-
+    return data, target
 
 def do_learning(main_model_dir, korean_model_dir, number):
     main(main_model_dir, korean_model_dir, number)
 
 if __name__ == '__main__':
-
+    global epoch
+    global correct
+    epoch = 0
+    correct = 0
     dataset_num = 1
 
     print('Dataset numper is {}'.format(dataset_num))
 
-    korean_model_dir = '/data2/hhjung/Sonmat_Result/Label_Learning/model'
+    korean_model_dir = '/data2/hhjung/Sonmat_Result/Resnet_Fifth_pretrain/'
     main_model_dir = '/data2/hhjung/Sonmat_Result/Resnet_Forth' 
 
     do_learning(main_model_dir, korean_model_dir, dataset_num)
