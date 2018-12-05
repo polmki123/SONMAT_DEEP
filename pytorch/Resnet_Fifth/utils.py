@@ -91,9 +91,9 @@ def check_model_result_image_crossloss(epoch, model, label_model, number, model_
 
         correct = label_model_process(epoch, label_data_set, label_model, test_data_set)
 
-        if correct > main.correct :
-            main.epoch = epoch
-            main.correct = correct
+        if correct > main.cross_correct :
+            main.cross_epoch = epoch
+            main.cross_correct = correct
 
 
 def label_model_process(epoch, label_data_set, label_model, test_data_set):
