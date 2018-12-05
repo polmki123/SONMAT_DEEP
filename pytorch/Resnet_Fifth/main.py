@@ -162,7 +162,7 @@ if __name__ == '__main__':
     print('Dataset numper is {}'.format(dataset_num))
 
     korean_model_dir = '/data2/hhjung/Sonmat_Result/Resnet_Fifth_pretrain/'
-    main_model_dir = '/data2/hhjung/Sonmat_Result/Resnet_Forth' 
+    main_model_dir = '/data2/hhjung/Sonmat_Result/Resnet_Fifth' 
 
     do_learning(main_model_dir, korean_model_dir, dataset_num)
         
