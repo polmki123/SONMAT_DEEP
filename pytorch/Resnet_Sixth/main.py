@@ -138,7 +138,11 @@ def test(model, criterion_MSE, criterion_Cross_last , test_loader, epoch):
 
 def setting_data(data, target, onehot_target):
     data = data.type(torch.cuda.FloatTensor)
+    #data = utils.renormalize_image(data)
+    #data = utils.normalize_function(data)
     target = target.type(torch.cuda.FloatTensor)
+    #target = utils.renormalize_image(target)
+    #target = utils.normalize_function(target)
     onehot_target = onehot_target.type(torch.cuda.LongTensor)
     onehot_target = torch.squeeze(onehot_target)
     return data, target, onehot_target

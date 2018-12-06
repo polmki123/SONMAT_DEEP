@@ -26,7 +26,7 @@ def main(main_model_dir, korean_model_dir, number):
     utils.default_model_dir = main_model_dir + '/model/'
     BATCH_SIZE = 64
     lr = 0.001
-    EPOCH = 200 
+    EPOCH = 20
     start_epoch = 0
     start_time = time.time()
 
@@ -71,9 +71,9 @@ def main(main_model_dir, korean_model_dir, number):
 
     # start train    
     for epoch in range(start_epoch, EPOCH+1):
-        if epoch < 100:
+        if epoch < 9:
             learning_rate = lr
-        elif epoch < 150:
+        elif epoch < 16:
             learning_rate = lr * 0.1
         else:
             learning_rate = lr * 0.01
@@ -138,17 +138,6 @@ def test(model, criterion_MSE, test_loader, epoch):
             print('Test# Epoch: {} | Batch: {}  | image_Loss: ({:.4f}) | Best label epoch : {} | Best Acc: ({:.2f}%)'
                   .format(epoch, batch_idx, print_loss, cross_epoch, cross_correct ))
 
-
-        # print_loss += Cross_Loss.item()
-        # print_loss2 += image_loss.item()
-        # _, predicted = torch.max(output[1].data, 1)
-        # total += target.size(0)
-        # correct += predicted.eq(onehot_target.data).sum()
-        # if batch_idx % 10 == 0:
-        #     utils.print_log('# TEST : Epoch: {} | Batch: {} |  Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
-        #           .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2 , 100. * correct / total, correct, total))
-        #     print('# TEST : Epoch: {} | Batch: {} |  Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
-        #           .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2 , 100. * correct / total, correct, total))
 
 
 def setting_data(data, target):
