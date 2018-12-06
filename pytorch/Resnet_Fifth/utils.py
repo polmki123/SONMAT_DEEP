@@ -63,6 +63,8 @@ def input_Deepmodel_image(inputimagedir):
 
 def check_model_result_image_crossloss(epoch, model, label_model, number, model_dir):
     # if epoch % 5 == 0:
+    global cross_correct
+    global cross_epoch
     saveimagedir = model_dir + '/result_image/' + str(number) + '/' + str(epoch) + '/'
     inputimagedir = '/data2/hhjung/Conpress_Son/test1.jpg'
     input_data = input_Deepmodel_image(inputimagedir)
