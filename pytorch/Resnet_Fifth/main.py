@@ -15,34 +15,21 @@ from model import *
 import main_model
 from collections import OrderedDict
 
-cross_epoch = 0
-cross_correct = 0
 os.environ["CUDA_VISIBLE_DEVICES"] = '6'
 
 def main(main_model_dir, korean_model_dir, number):
-	# global cross_epoch
- #    global cross_correct
     
     utils.default_model_dir = main_model_dir + '/model/'
     BATCH_SIZE = 64
     lr = 0.001
-    EPOCH = 200 
+    EPOCH = 20 
     start_epoch = 0
     start_time = time.time()
 
     train_Data, test_Data = utils.Package_Data_Slice_Loder(number)
-    
     train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
     test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
 
-    
-    
-    # new_state_dict = OrderedDict()
-    # for k, v in korean_checkpoint['state_dict'].items():
-    #     name = k[7:] # remove `module.`
-    #     new_state_dict[name] = v
-
-    # utils.init_learning(label_model)
 
     model = main_model.ResNet()
     label_model = ResNet()
@@ -54,12 +41,14 @@ def main(main_model_dir, korean_model_dir, number):
         cudnn.benchmark = True
     else:
         print("NO GPU -_-;")
-        
+    
+
     korean_checkpoint = utils.load_checkpoint(korean_model_dir)
     label_model.load_state_dict(korean_checkpoint['state_dict'])
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     # criterion_Cross = nn.CrossEntropyLoss().cuda()
     criterion_MSE = nn.MSELoss().cuda()
+
 
     checkpoint = utils.load_checkpoint(utils.default_model_dir)
     if not checkpoint:
@@ -69,11 +58,12 @@ def main(main_model_dir, korean_model_dir, number):
         model.load_state_dict(checkpoint['state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer'])
 
+
     # start train    
     for epoch in range(start_epoch, EPOCH+1):
-        if epoch < 100:
+        if epoch < 8:
             learning_rate = lr
-        elif epoch < 150:
+        elif epoch < 15:
             learning_rate = lr * 0.1
         else:
             learning_rate = lr * 0.01
@@ -112,9 +102,9 @@ def train(model, optimizer, criterion_MSE, train_loader, epoch):
         print_loss += image_loss.item()
         if batch_idx % 10 == 0:
             utils.print_log('Epoch: {} | Batch: {}  | image_Loss: ({:.4f}) | Best label epoch : {} | Best Acc: ({:.2f}%)'
-                  .format(epoch, batch_idx, print_loss, cross_epoch, cross_correct ))
+                  .format(epoch, batch_idx, print_loss, utils.cross_epoch, utils.cross_correct ))
             print('Epoch: {} | Batch: {}  | image_Loss: ({:.4f}) | Best label epoch : {} | Best Acc: ({:.2f}%)'
-                  .format(epoch, batch_idx, print_loss, cross_epoch, cross_correct ))
+                  .format(epoch, batch_idx, print_loss, utils.cross_epoch, utils.cross_correct ))
             
         
 def test(model, criterion_MSE, test_loader, epoch):
@@ -134,9 +124,9 @@ def test(model, criterion_MSE, test_loader, epoch):
         print_loss += image_loss.item()
         if batch_idx % 10 == 0:
             utils.print_log('Test# Epoch: {} | Batch: {}  | image_Loss: ({:.4f}) | Best label epoch : {} | Best Acc: ({:.2f}%)'
-                  .format(epoch, batch_idx, print_loss, cross_epoch, cross_correct ))
+                  .format(epoch, batch_idx, print_loss, utils.cross_epoch, utils.cross_correct ))
             print('Test# Epoch: {} | Batch: {}  | image_Loss: ({:.4f}) | Best label epoch : {} | Best Acc: ({:.2f}%)'
-                  .format(epoch, batch_idx, print_loss, cross_epoch, cross_correct ))
+                  .format(epoch, batch_idx, print_loss, utils.cross_epoch, utils.cross_correct ))
 
 
         # print_loss += Cross_Loss.item()
@@ -160,7 +150,6 @@ def do_learning(main_model_dir, korean_model_dir, number):
     main(main_model_dir, korean_model_dir, number)
 
 if __name__ == '__main__':
-    
     
     dataset_num = 1
 

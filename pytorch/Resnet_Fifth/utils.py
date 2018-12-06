@@ -11,8 +11,9 @@ import gzip
 import random
 import math
 import PIL.ImageOps
-import main
 default_model_dir = "./"
+cross_epoch = 0
+cross_correct = 0
 
 
 def make_one_hot() :
@@ -36,14 +37,14 @@ def init_learning(model):
             init_learning(child)
 
 def save_model_checkpoint(epoch, model, model_dir, optimizer):
-    if epoch % 20 == 0:
-        model_filename = 'checkpoint_%02d.pth.tar' % epoch
-        save_checkpoint({
-            'epoch': epoch,
-            'model': model,
-            'state_dict': model.state_dict(),
-            'optimizer': optimizer.state_dict(),
-        }, model_filename, model_dir )
+    # if epoch % 20 == 0:
+    model_filename = 'checkpoint_%02d.pth.tar' % epoch
+    save_checkpoint({
+        'epoch': epoch,
+        'model': model,
+        'state_dict': model.state_dict(),
+        'optimizer': optimizer.state_dict(),
+    }, model_filename, model_dir )
 
 
 def input_Deepmodel_image(inputimagedir):
@@ -61,39 +62,39 @@ def input_Deepmodel_image(inputimagedir):
     return input_data
 
 def check_model_result_image_crossloss(epoch, model, label_model, number, model_dir):
-    if epoch % 5 == 0:
-        saveimagedir = model_dir + '/result_image/' + str(number) + '/' + str(epoch) + '/'
-        inputimagedir = '/data2/hhjung/Conpress_Son/test1.jpg'
-        input_data = input_Deepmodel_image(inputimagedir)
-        model.eval()
-        check_point = 0
-        test_data_set = []
-        label_data_set = make_one_hot()
-        for i in input_data:
-            check_point = check_point + 1
-            i = np.array(i)
-            i = i.reshape(1, 9, 64, 64)
-            input = torch.from_numpy(i)
-            input = Variable(input.cuda())
-            input = input.type(torch.cuda.FloatTensor)
-            input = normalize_image(input)
-            output = model(input)
-            output = Variable(output[0]).data.cpu().numpy()
-            test_data_set.append(output)
-            output = output.reshape(64, 64)
-            # print(output)
-            output =renormalize_image(output)
-            img = Image.fromarray(output.astype('uint8'), 'L')
-            #img = PIL.ImageOps.invert(img)
-            if not os.path.exists(saveimagedir):
-                os.makedirs(saveimagedir)
-            img.save(saveimagedir + str(check_point) + 'my.jpg')
+    # if epoch % 5 == 0:
+    saveimagedir = model_dir + '/result_image/' + str(number) + '/' + str(epoch) + '/'
+    inputimagedir = '/data2/hhjung/Conpress_Son/test1.jpg'
+    input_data = input_Deepmodel_image(inputimagedir)
+    model.eval()
+    check_point = 0
+    test_data_set = []
+    label_data_set = make_one_hot()
+    for i in input_data:
+        check_point = check_point + 1
+        i = np.array(i)
+        i = i.reshape(1, 9, 64, 64)
+        input = torch.from_numpy(i)
+        input = Variable(input.cuda())
+        input = input.type(torch.cuda.FloatTensor)
+        input = normalize_image(input)
+        output = model(input)
+        output = Variable(output[0]).data.cpu().numpy()
+        test_data_set.append(output)
+        output = output.reshape(64, 64)
+        # print(output)
+        output =renormalize_image(output)
+        img = Image.fromarray(output.astype('uint8'), 'L')
+        #img = PIL.ImageOps.invert(img)
+        if not os.path.exists(saveimagedir):
+            os.makedirs(saveimagedir)
+        img.save(saveimagedir + str(check_point) + 'my.jpg')
 
-        correct = label_model_process(epoch, label_data_set, label_model, test_data_set)
+    correct = label_model_process(epoch, label_data_set, label_model, test_data_set)
 
-        if correct > main.cross_correct :
-            main.cross_epoch = epoch
-            main.cross_correct = correct
+    if correct > cross_correct :
+        cross_epoch = epoch
+        cross_correct = correct
 
         
 
