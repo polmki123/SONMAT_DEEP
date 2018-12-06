@@ -16,17 +16,16 @@ from model import *
 os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 
 def main(model_dir, number):
-    utils.default_model_dir = model_dir
-    BATCH_SIZE = 128
-    lr = 0.0002
-    EPOCH = 200 
+    utils.default_model_dir = model_dir + '/model/'
+    BATCH_SIZE = 64
+    lr = 0.001
+    EPOCH = 25
     start_epoch = 0
     train_Data, test_Data = utils.Package_Data_onehot_Slice_Loder(number+1)
     
     train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
     test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
 
-    utils.default_model_dir = model_dir
     
     start_time = time.time()
 
@@ -45,7 +44,7 @@ def main(model_dir, number):
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas = (0.5, 0.999))
     criterion_MSE = nn.MSELoss().cuda()
     criterion_Cross_last = nn.CrossEntropyLoss().cuda()
-    checkpoint = utils.load_checkpoint(model_dir+str(number))
+    checkpoint = utils.load_checkpoint(utils.default_model_dir)
 
     if not checkpoint:
         pass
@@ -55,9 +54,9 @@ def main(model_dir, number):
         optimizer.load_state_dict(checkpoint['optimizer'])
 
     for epoch in range(start_epoch, EPOCH+1):
-        if epoch < 100:
+        if epoch < 9:
             learning_rate = lr
-        elif epoch < 150:
+        elif epoch < 16:
             learning_rate = lr * 0.1
         else:
             learning_rate = lr * 0.01
@@ -66,8 +65,8 @@ def main(model_dir, number):
     
         train(model, optimizer, criterion_MSE, criterion_Cross_last , train_loader, epoch)
         test(model, criterion_MSE, criterion_Cross_last , test_loader, epoch)
-        utils.save_model_checkpoint(epoch, model, model_dir, number, optimizer)
-        utils.check_model_result_image(epoch, model, number)
+        utils.save_model_checkpoint(epoch, model, utils.default_model_dir, optimizer)
+        utils.check_model_result_image(epoch, model, number, model_dir)
         
     # utils.conv_weight_L1_printing(model.module)
     now = time.gmtime(time.time() - start_time)
@@ -138,7 +137,11 @@ def test(model, criterion_MSE, criterion_Cross_last , test_loader, epoch):
 
 def setting_data(data, target, onehot_target):
     data = data.type(torch.cuda.FloatTensor)
+    #data = utils.renormalize_image(data)
+    #data = utils.normalize_function(data)
     target = target.type(torch.cuda.FloatTensor)
+    #target = utils.renormalize_image(target)
+    #target = utils.normalize_function(target)
     onehot_target = onehot_target.type(torch.cuda.LongTensor)
     onehot_target = torch.squeeze(onehot_target)
     return data, target, onehot_target
@@ -151,6 +154,6 @@ def do_learning(model_dir, number):
 
 if __name__ == '__main__':
     print(str(1)+'for train')	
-    model_dir = '../ResNet_Test1/model/{}'.format(1)
+    model_dir = '/data2/hhjung/Sonmat_Result/Resnet_Sixth' 
     do_learning(model_dir, 1)
         

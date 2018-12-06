@@ -129,17 +129,6 @@ def test(model, criterion_MSE, test_loader, epoch):
                   .format(epoch, batch_idx, print_loss, utils.cross_epoch, utils.cross_correct ))
 
 
-        # print_loss += Cross_Loss.item()
-        # print_loss2 += image_loss.item()
-        # _, predicted = torch.max(output[1].data, 1)
-        # total += target.size(0)
-        # correct += predicted.eq(onehot_target.data).sum()
-        # if batch_idx % 10 == 0:
-        #     utils.print_log('# TEST : Epoch: {} | Batch: {} |  Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
-        #           .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2 , 100. * correct / total, correct, total))
-        #     print('# TEST : Epoch: {} | Batch: {} |  Cross_Loss: ({:.4f}) | image_Loss: ({:.4f}) | Acc: ({:.2f}%) ({}/{})'
-        #           .format(epoch, batch_idx, print_loss / (batch_idx + 1), print_loss2 , 100. * correct / total, correct, total))
-
 
 def setting_data(data, target):
     data = data.type(torch.cuda.FloatTensor)

@@ -12,8 +12,6 @@ import random
 import math
 import PIL.ImageOps
 default_model_dir = "./"
-cross_epoch = 0
-cross_correct = 0
 
 
 def make_one_hot() :
@@ -37,7 +35,7 @@ def init_learning(model):
             init_learning(child)
 
 def save_model_checkpoint(epoch, model, model_dir, optimizer):
-    if epoch % 1 == 0:
+    if epoch % 20 == 0:
         model_filename = 'checkpoint_%02d.pth.tar' % epoch
         save_checkpoint({
             'epoch': epoch,
@@ -60,75 +58,6 @@ def input_Deepmodel_image(inputimagedir):
             input_data.append(Concat_data)
     
     return input_data
-
-def check_model_result_image_crossloss(epoch, model, label_model, number, model_dir):
-    # if epoch % 5 == 0:
-    saveimagedir = model_dir + '/result_image/' + str(number) + '/' + str(epoch) + '/'
-    inputimagedir = '/data2/hhjung/Conpress_Son/test1.jpg'
-    input_data = input_Deepmodel_image(inputimagedir)
-    model.eval()
-    check_point = 0
-    test_data_set = []
-    label_data_set = make_one_hot()
-    for i in input_data:
-        check_point = check_point + 1
-        i = np.array(i)
-        i = i.reshape(1, 9, 64, 64)
-        input = torch.from_numpy(i)
-        input = Variable(input.cuda())
-        input = input.type(torch.cuda.FloatTensor)
-        input = normalize_image(input)
-        output = model(input)
-        output = Variable(output[0]).data.cpu().numpy()
-        test_data_set.append(output)
-        output = output.reshape(64, 64)
-        # print(output)
-        output =renormalize_image(output)
-        img = Image.fromarray(output.astype('uint8'), 'L')
-        #img = PIL.ImageOps.invert(img)
-        if not os.path.exists(saveimagedir):
-            os.makedirs(saveimagedir)
-        img.save(saveimagedir + str(check_point) + 'my.jpg')
-
-    correct = label_model_process(epoch, label_data_set, label_model, test_data_set)
-
-    if correct > cross_correct :
-        cross_epoch = epoch
-        cross_correct = correct
-
-
-def label_model_process(epoch, label_data_set, label_model, test_data_set):
-    label_model.eval()
-    test_data_set = np.array(test_data_set)
-    label_data_set = np.array(label_data_set)
-    test_dataset = torch.utils.data.TensorDataset(torch.from_numpy(test_data_set), torch.from_numpy(label_data_set))
-    test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=128, shuffle=False, num_workers=4)
-    print_loss = 0
-    total = 0
-    correct = 0
-    for batch_idx, (data, target) in enumerate(test_loader):
-        if torch.cuda.is_available():
-            data, target = Variable(data.cuda()), Variable(target.cuda())
-        else:
-            data, target = Variable(data), Variable(target)
-        
-        data, target = setting_data(data, target)
-        output = label_model(data)
-        
-        _, predicted = torch.max(output.data, 1)
-        total += target.size(0)
-        correct += predicted.eq(target.data).sum()
-        # if batch_idx % 5 == 0:
-        #     print('# TEST : Epoch: {} | Batch: {} | Acc: ({:.2f}%) ({}/{})'
-        #           .format(epoch, batch_idx, 100. * correct / total, correct, total))
-    return correct
-
-
-def setting_data(data, target):
-    data = data.type(torch.cuda.FloatTensor)
-    target = target.type(torch.cuda.LongTensor)
-    target = torch.squeeze(target)
-    return data, target
 
 def check_model_result_image(epoch, model, number, model_dir):
     if epoch % 5 == 0:
@@ -417,33 +346,6 @@ def Test_Data_onehot_Slice_Loder(number):
     #make train, test dataset
     train_dataset = torch.utils.data.TensorDataset(torch.from_numpy(X_datas), torch.from_numpy(label_datas), torch.from_numpy(onehot_datas))
     test_dataset = torch.utils.data.TensorDataset(torch.from_numpy(X_test_datas), torch.from_numpy(test_label_datas),  torch.from_numpy(onehot_test_datas))
-    
-    return train_dataset, test_dataset
-
-
-def Test_Data_Slice_Loder(number):
-    # read train data
-    numpy_x = np.random.rand(2350,9,64,64)
-    numpy_label = np.random.rand(2350,1,64,64)
-    
-    X_datas = np.array(numpy_x)
-    print(X_datas.shape)
-    label_datas = np.array(numpy_label)
-    print(label_datas.shape)
-
-
-    # read test data
-    numpy_test = np.random.rand(2350,9,64,64)
-    numpy_label_test = np.random.rand(2350,1,64,64)
-    
-    X_test_datas = np.array(numpy_test)
-    print(X_test_datas.shape)
-    test_label_datas = np.array(numpy_label_test)
-    print(test_label_datas.shape)
-
-    #make train, test dataset
-    train_dataset = torch.utils.data.TensorDataset(torch.from_numpy(X_datas), torch.from_numpy(label_datas))
-    test_dataset = torch.utils.data.TensorDataset(torch.from_numpy(X_test_datas), torch.from_numpy(test_label_datas))
     
     return train_dataset, test_dataset
 
