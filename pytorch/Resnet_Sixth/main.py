@@ -13,7 +13,7 @@ import numpy as np
 import PIL.ImageOps
 from model import *
 
-os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+os.environ["CUDA_VISIBLE_DEVICES"] = '6'
 
 def main(model_dir, number):
     utils.default_model_dir = model_dir + '/model/'
