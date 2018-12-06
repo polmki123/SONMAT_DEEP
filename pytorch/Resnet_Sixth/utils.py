@@ -35,7 +35,7 @@ def init_learning(model):
             init_learning(child)
 
 def save_model_checkpoint(epoch, model, model_dir, optimizer):
-    if epoch % 20 == 0:
+    if epoch % 1 == 0:
         model_filename = 'checkpoint_%02d.pth.tar' % epoch
         save_checkpoint({
             'epoch': epoch,
@@ -60,7 +60,7 @@ def input_Deepmodel_image(inputimagedir):
     return input_data
 
 def check_model_result_image(epoch, model, number, model_dir):
-    if epoch % 5 == 0:
+    if epoch % 1 == 0:
         saveimagedir = model_dir + '/result_image/' + str(number) + '/' + str(epoch) + '/'
         inputimagedir = '/data2/hhjung/Conpress_Son/test1.jpg'
         input_data = input_Deepmodel_image(inputimagedir)
@@ -75,7 +75,7 @@ def check_model_result_image(epoch, model, number, model_dir):
             input = input.type(torch.cuda.FloatTensor)
             input = normalize_image(input)
             output = model(input)
-            output = Variable(output[0]).data.cpu().numpy()
+            output = Variable(output[1]).data.cpu().numpy()
             output = output.reshape(64, 64)
             # print(output)
             output =renormalize_image(output)
