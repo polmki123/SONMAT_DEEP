@@ -47,28 +47,27 @@ def save_model_checkpoint(epoch, model, model_dir, optimizer):
 
 def input_Deepmodel_image(inputimagedir):
     frame_dir = '/data2/hhjung/Conpress_Son/frame_label/'
-    frame_paths = glob.glob(os.path.join(frame_dir, '*.jpg'))
+    frame_paths = os.listdir(frame_dir)
     input_data = list()
     for frame in frame_paths:
-        frame_image = np.array(Image.open(frame)).reshape(1, 64, 64)
+        frame_image = np.array(Image.open( frame_dir + frame)).reshape(1, 64, 64)
         input_image = np.array(Image.open(inputimagedir))
         input_image = np.array(np.split(input_image, 8, axis=1))  # 8*64*64
         Concat_data = np.append(input_image, frame_image, axis=0)
         if ((9, 64, 64) == Concat_data.shape):
             input_data.append(Concat_data)
     
-    return input_data
+    return input_data, frame_paths
 
 def check_model_result_image(epoch, model, number, model_dir):
     if epoch % 1 == 0:
         saveimagedir = model_dir + '/result_image/' + str(number) + '/' + str(epoch) + '/'
         inputimagedir = '/data2/hhjung/Conpress_Son/test1.jpg'
-        input_data = input_Deepmodel_image(inputimagedir)
+        input_data, frame_name = input_Deepmodel_image(inputimagedir)
         model.eval()
-        check_point = 0
-        for i in input_data:
-            check_point = check_point + 1
-            i = np.array(i)
+        
+        for number in range(len(input_data)):
+            i = np.array(input_data[number])
             i = i.reshape(1, 9, 64, 64)
             input = torch.from_numpy(i)
             input = Variable(input.cuda())
@@ -83,7 +82,7 @@ def check_model_result_image(epoch, model, number, model_dir):
             #img = PIL.ImageOps.invert(img)
             if not os.path.exists(saveimagedir):
                 os.makedirs(saveimagedir)
-            img.save(saveimagedir + str(check_point) + 'my.jpg')
+            img.save(saveimagedir + frame_name[number])
             
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
