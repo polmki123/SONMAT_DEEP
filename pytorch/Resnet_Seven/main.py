@@ -73,6 +73,65 @@ def main(model_dir, number):
     now = time.gmtime(time.time() - start_time)
     print('{} hours {} mins {} secs for training'.format(now.tm_hour, now.tm_min, now.tm_sec))
 
+#Test main code for before the training 
+def Test_main(model_dir, number):
+    utils.default_model_dir = model_dir + '/model/'
+    BATCH_SIZE = 64
+    lr = 0.001
+    EPOCH = 15
+    start_epoch = 0
+
+    train_Data, test_Data = utils.Test_Data_onehot_Slice_Loder(number)
+    
+    train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
+    test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
+
+    
+    start_time = time.time()
+
+    model = ResNet()
+    
+    if torch.cuda.is_available():
+        # os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+        print("USE", torch.cuda.device_count(), "GPUs!")
+        model = nn.DataParallel(model).cuda()
+        cudnn.benchmark = True
+
+    else:
+        print("NO GPU -_-;")
+        
+    # Loss and Optimizer
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas = (0.5, 0.999))
+    criterion_MSE = nn.MSELoss().cuda()
+    criterian_first = nn.CrossEntropyLoss().cuda()
+    criterian_middle = nn.CrossEntropyLoss().cuda()
+    checkpoint = utils.load_checkpoint(utils.default_model_dir)
+
+    if not checkpoint:
+        pass
+    else:
+        start_epoch = checkpoint['epoch'] + 1
+        model.load_state_dict(checkpoint['state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer'])
+
+    for epoch in range(start_epoch, EPOCH+1):
+        if epoch < 6:
+            learning_rate = lr
+        elif epoch < 10:
+            learning_rate = lr * 0.1
+        else:
+            learning_rate = lr * 0.01
+        for param_group in optimizer.param_groups:
+            param_group['lr'] = learning_rate
+    
+        train(model, optimizer, criterion_MSE, criterian_first, criterian_middle, train_loader, epoch)
+        test(model, criterion_MSE, criterian_first ,criterian_middle, test_loader, epoch)
+        utils.save_model_checkpoint(epoch, model, utils.default_model_dir, optimizer)
+        utils.check_model_result_image(epoch, model, number, model_dir)
+        
+    # utils.conv_weight_L1_printing(model.module)
+    now = time.gmtime(time.time() - start_time)
+    print('{} hours {} mins {} secs for training'.format(now.tm_hour, now.tm_min, now.tm_sec))
 
 # Train the model
 def train(model, optimizer, criterion_MSE, criterian_first, criterian_middle, train_loader, epoch):
@@ -168,6 +227,7 @@ def do_learning(model_dir, number):
     global max_result
     max_result = []
     main(model_dir, number)
+    #Test_main(model_dir, number)
 
 if __name__ == '__main__':
     print(str(1)+'for train')	
