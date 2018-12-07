@@ -46,7 +46,7 @@ def save_model_checkpoint(epoch, model, model_dir, optimizer):
 
 
 def input_Deepmodel_image(inputimagedir):
-    frame_dir = '/data2/hhjung/Conpress_Son/frame_label/'
+    frame_dir = '/data2/hhjung/Conpress_Son/unicode_frame/'
     frame_paths = os.listdir(frame_dir)
     input_data = list()
     for frame in frame_paths:

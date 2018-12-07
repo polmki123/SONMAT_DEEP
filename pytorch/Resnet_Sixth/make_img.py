@@ -17,7 +17,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = '6'
 
 def main(model_dir, number):
     utils.default_model_dir = model_dir + '/model/'
-    epoch = 50
+    epoch = 'result'
     start_time = time.time()
 
     model = ResNet()
