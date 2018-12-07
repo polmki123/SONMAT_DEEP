@@ -75,6 +75,9 @@ class ResNet(nn.Module):
         for i in range(1,self.n):
             self.layer2.add_module('layer2_%d' % (i), BasicBlock(in_channels=64, out_channels=64, stride=1, downsample=None))
 
+
+        self.fc_middle_out = nn.Linear(4096, num_classes)
+
         # 64 32 32
         self.layer3 = nn.Sequential()
         self.layer3.add_module('layer3_0', BasicBlock(in_channels=64, out_channels=128, stride=2, downsample=True))
@@ -105,7 +108,7 @@ class ResNet(nn.Module):
 
         Cross_middle_out = self.Class_Maxpool(x)
         Cross_middle_out = Cross_middle_out.view(Cross_middle_out.size(0), -1)
-        Cross_middle_out = self.fc_out(Cross_middle_out)
+        Cross_middle_out = self.fc_middle_out(Cross_middle_out)
 
         x = self.layer3(x)
         x = self.layer4(x)
