@@ -140,7 +140,7 @@ if __name__ == '__main__':
 
     print('Dataset numper is {}'.format(dataset_num))
 
-    main_model_dir = '/data2/hhjung/Sonmat_Result/Resnet_Fifth' 
+    main_model_dir = '/data2/hhjung/Sonmat_Result/Resnet_Tconv2d_nocross' 
 
     do_learning(main_model_dir, dataset_num)
         
