@@ -85,11 +85,10 @@ class ResNet(nn.Module):
     def __init__(self, num_classes=2350, resnet_layer=56):
         super(ResNet, self).__init__()
         self.conv1 = nn.Conv2d(9, 64, kernel_size=3, stride=2, padding=1, bias=False)
-        self.conv2 = nn.Conv2d(64,64, kernel_size=3, padding =1)
         self.bn1 = nn.BatchNorm2d(64)
-        # self.relu = nn.ReLU(True)
+        self.relu = nn.ReLU(True)
         self.Tanh = nn.Tanh()
-        self.n = 4
+        self.n = 8
 
         # 64 32 32
         self.layer1 = nn.Sequential()
@@ -140,35 +139,28 @@ class ResNet(nn.Module):
         self.Dlayer4.add_module('layer8_1', nn.Conv2d(8, 1, kernel_size=1, stride=1, padding=0, bias=False))
         # 1 64 64
 
-        self.Class_avgpool_middle = nn.AvgPool2d(kernel_size=4, stride=1)
-        self.fc_middle = nn.Linear(512, num_classes)
+        self.Class_avgpool_middle = nn.AvgPool2d(kernel_size=4, stride=4)
+        self.fc_middle = nn.Linear(4096, num_classes)
 
-        self.Class_avgpool_final = nn.AvgPool2d(kernel_size=2, stride=2)
-        self.fc_final = nn.Linear(1024, num_classes)
 
-        #self.relu = nn.relu()
         
     def forward(self, x):	
         x = self.relu(self.bn1(self.conv1(x)))
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-        x = self.layer4(x)
 
         middle = self.Class_avgpool_middle(x)
         middle = middle.view(middle.size(0), -1)
         middle = self.fc_middle(middle)
+
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
 
         x = self.Dlayer1(x)
         x = self.Dlayer2(x)
         x = self.Dlayer3(x)
         x = self.Dlayer4(x)
 
-        final = self.Class_avgpool_final(x)
-        final = final.view(final.size(0), -1)
-        final = self.fc_final(final)
-
-        x = self.conv2(x)
         x = self.Tanh(x)
 
-        return [x, middle, final] # MSE, 
+        return [middle, x] # MSE, 
