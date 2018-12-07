@@ -149,7 +149,7 @@ def do_learning(model_dir, number):
     main(model_dir, number)
 
 if __name__ == '__main__':
-    print(str(1)+'for train')	
-    model_dir = '/data2/hhjung/Sonmat_Result/Resnet_Sixth' 
-    do_learning(model_dir, 1)
+    print(str(3)+'for train')	
+    model_dir = '/data2/hhjung/Sonmat_Result/Resnet_Sixth_Third' 
+    do_learning(model_dir, 3)
         
