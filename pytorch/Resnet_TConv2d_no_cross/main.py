@@ -12,7 +12,6 @@ from PIL import Image
 import numpy as np
 import PIL.ImageOps
 from model import *
-import main_model
 from collections import OrderedDict
 
 os.environ["CUDA_VISIBLE_DEVICES"] = '5'
@@ -31,12 +30,11 @@ def main(main_model_dir, number):
     test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
 
 
-    model = main_model.ResNet()
-    label_model = ResNet()
+    model =ResNet()
+
 
     if torch.cuda.is_available():
         print("USE", torch.cuda.device_count(), "GPUs!")
-        label_model = nn.DataParallel(label_model).cuda()
         model = nn.DataParallel(model).cuda()
         cudnn.benchmark = True
     else:
