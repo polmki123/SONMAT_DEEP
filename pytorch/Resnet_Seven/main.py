@@ -82,6 +82,7 @@ def train(model, optimizer, criterion_MSE, criterian_first, criterian_middle, tr
     print_loss3 = 0
     total = 0
     correct = 0
+    correct2 = 0
     for batch_idx, (data, target, onehot_target) in enumerate(train_loader):
         if torch.cuda.is_available():
             data, target, onehot_target = Variable(data.cuda()), Variable(target.cuda()), Variable(onehot_target.cuda())
@@ -120,8 +121,10 @@ def test(model, criterion_MSE, criterian_first ,criterian_middle, test_loader, e
     model.eval()
     print_loss = 0
     print_loss2 = 0  
+    print_loss3 = 0
     total = 0
     correct = 0
+    correct2 = 0
     for batch_idx, (data, target, onehot_target) in enumerate(test_loader):
         if torch.cuda.is_available():
             data, target, onehot_target = Variable(data.cuda()), Variable(target.cuda()), Variable(onehot_target.cuda())
