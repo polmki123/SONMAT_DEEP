@@ -18,7 +18,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = '6'
 def main(model_dir, number):
     utils.default_model_dir = model_dir + '/model/'
     BATCH_SIZE = 64
-    lr = 0.001
+    lr = 0.0002
     EPOCH = 25
     start_epoch = 0
     train_Data, test_Data = utils.Package_Data_onehot_Slice_Loder(number)
