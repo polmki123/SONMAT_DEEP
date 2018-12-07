@@ -97,10 +97,10 @@ def train(model, optimizer, criterion_MSE, train_loader, epoch):
         optimizer.step()
         print_loss += image_loss.item()
         if batch_idx % 10 == 0:
-            utils.print_log('Epoch: {} | Batch: {}  | image_Loss: ({:.4f}) | Best label epoch : {} | Best Acc: ({:.2f}%)'
-                  .format(epoch, batch_idx, print_loss, utils.cross_epoch, utils.cross_correct ))
-            print('Epoch: {} | Batch: {}  | image_Loss: ({:.4f}) | Best label epoch : {} | Best Acc: ({:.2f}%)'
-                  .format(epoch, batch_idx, print_loss, utils.cross_epoch, utils.cross_correct ))
+            utils.print_log('Epoch: {} | Batch: {}  | image_Loss: ({:.4f})'
+                  .format(epoch, batch_idx, print_loss))
+            print('Epoch: {} | Batch: {}  | image_Loss: ({:.4f})'
+                  .format(epoch, batch_idx, print_loss))
             
         
 def test(model, criterion_MSE, test_loader, epoch):
@@ -119,10 +119,10 @@ def test(model, criterion_MSE, test_loader, epoch):
         image_loss = criterion_MSE(output, target)
         print_loss += image_loss.item()
         if batch_idx % 10 == 0:
-            utils.print_log('Test# Epoch: {} | Batch: {}  | image_Loss: ({:.4f}) | Best label epoch : {} | Best Acc: ({:.2f}%)'
-                  .format(epoch, batch_idx, print_loss, utils.cross_epoch, utils.cross_correct ))
-            print('Test# Epoch: {} | Batch: {}  | image_Loss: ({:.4f}) | Best label epoch : {} | Best Acc: ({:.2f}%)'
-                  .format(epoch, batch_idx, print_loss, utils.cross_epoch, utils.cross_correct ))
+            utils.print_log('Epoch: {} | Batch: {}  | image_Loss: ({:.4f})'
+                  .format(epoch, batch_idx, print_loss))
+            print('Epoch: {} | Batch: {}  | image_Loss: ({:.4f})'
+                  .format(epoch, batch_idx, print_loss))
 
 
 
