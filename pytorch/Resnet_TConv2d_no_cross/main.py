@@ -131,8 +131,8 @@ def setting_data(data, target):
     target = target.type(torch.cuda.FloatTensor)
     return data, target
 
-def do_learning(main_model_dir, korean_model_dir, number):
-    main(main_model_dir, korean_model_dir, number)
+def do_learning(main_model_dir,  number):
+    main(main_model_dir, number)
 
 if __name__ == '__main__':
     

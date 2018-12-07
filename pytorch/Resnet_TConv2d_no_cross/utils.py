@@ -74,7 +74,7 @@ def check_model_result_image(epoch, model, number, model_dir):
             input = input.type(torch.cuda.FloatTensor)
             input = normalize_image(input)
             output = model(input)
-            output = Variable(output[1]).data.cpu().numpy()
+            output = Variable(output).data.cpu().numpy()
             output = output.reshape(64, 64)
             # print(output)
             output =renormalize_image(output)
