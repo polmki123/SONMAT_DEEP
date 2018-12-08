@@ -82,7 +82,7 @@ def check_model_result_image(epoch, model, number, model_dir):
             img = img.filter(ImageFilter.SHARPEN)
             if not os.path.exists(save_image_dir):
                 os.makedirs(save_image_dir)
-            img.save(save_image_dir + output_name[count][:-4] + '.png', "PNG")
+            img.save(saveimagedir + output_name[count][:-4] + '.png', "PNG")
             
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
