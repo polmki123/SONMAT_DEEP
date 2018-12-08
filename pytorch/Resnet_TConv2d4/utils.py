@@ -79,10 +79,10 @@ def check_model_result_image(epoch, model, number, model_dir):
             # print(output)
             output =renormalize_image(output)
             img = Image.fromarray(output.astype('uint8'), 'L')
-	        img = img.filter(ImageFilter.SHARPEN)
-	        if not os.path.exists(save_image_dir):
-	            os.makedirs(save_image_dir)
-	        img.save(save_image_dir + output_name[count][:-4] + '.png', "PNG")
+            img = img.filter(ImageFilter.SHARPEN)
+            if not os.path.exists(save_image_dir):
+                os.makedirs(save_image_dir)
+            img.save(save_image_dir + output_name[count][:-4] + '.png', "PNG")
             
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
@@ -211,7 +211,7 @@ def Package_Data_Slice_Loder(number):
                 numpy_label.extend(e[1])
                  
                 if len(numpy_x) % 1000 == 0:
-                	print("processed %d examples" % len(numpy_x))
+                    print("processed %d examples" % len(numpy_x))
             except EOFError:
                 print('error')
                 break
