@@ -11,7 +11,7 @@ import glob
 from PIL import Image
 import numpy as np
 import PIL.ImageOps
-import main_model
+import model
 
 os.environ["CUDA_VISIBLE_DEVICES"] = '6'
 
@@ -20,7 +20,7 @@ def main(model_dir, number):
     epoch = 50
     start_time = time.time()
 
-    model = main_model.ResNet()
+    model = ResNet()
     
     if torch.cuda.is_available():
         # os.environ["CUDA_VISIBLE_DEVICES"] = '0'
