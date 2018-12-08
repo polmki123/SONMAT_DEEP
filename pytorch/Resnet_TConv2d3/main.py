@@ -13,15 +13,15 @@ import numpy as np
 import PIL.ImageOps
 from model import *
 
-os.environ["CUDA_VISIBLE_DEVICES"] = '6'
+os.environ["CUDA_VISIBLE_DEVICES"] = '7'
 
 def main(model_dir, number):
     utils.default_model_dir = model_dir + '/model/'
     BATCH_SIZE = 64
     lr = 0.001
-    EPOCH = 25
+    EPOCH = 30
     start_epoch = 0
-    train_Data, test_Data = utils.Package_Data_onehot_Slice_Loder(number)
+    train_Data, test_Data = utils.Package_Data_onehot_Slice_Loder(3)
     
     train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=BATCH_SIZE, shuffle=True, num_workers = 4)
     test_loader = torch.utils.data.DataLoader(dataset=test_Data, batch_size=BATCH_SIZE, shuffle=False, num_workers = 4)
@@ -58,8 +58,10 @@ def main(model_dir, number):
             learning_rate = lr
         elif epoch < 18:
             learning_rate = lr * 0.5
-        else:
+        elif epoch < 25 :
             learning_rate = lr * 0.2
+        else :
+        	learning_rate = lr * 0.05
         for param_group in optimizer.param_groups:
             param_group['lr'] = learning_rate
     
@@ -150,6 +152,6 @@ def do_learning(model_dir, number):
 
 if __name__ == '__main__':
     print(str(1)+'for train')	
-    model_dir = '/data2/hhjung/Sonmat_Result/Resnet_test2' 
+    model_dir = '/data2/hhjung/Sonmat_Result/Resnet_Tconv2d3' 
     do_learning(model_dir, 1)
         
