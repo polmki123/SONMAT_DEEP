@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torchvision import datasets, transforms
 from torch.autograd import Variable
-from PIL import Image
+from PIL import Image, ImageFilter
 import os
 import numpy as np
 import glob
@@ -79,10 +79,10 @@ def check_model_result_image(epoch, model, number, model_dir):
             # print(output)
             output =renormalize_image(output)
             img = Image.fromarray(output.astype('uint8'), 'L')
-            #img = PIL.ImageOps.invert(img)
-            if not os.path.exists(saveimagedir):
-                os.makedirs(saveimagedir)
-            img.save(saveimagedir + frame_name[number])
+	        img = img.filter(ImageFilter.SHARPEN)
+	        if not os.path.exists(save_image_dir):
+	            os.makedirs(save_image_dir)
+	        img.save(save_image_dir + output_name[count][:-4] + '.png', "PNG")
             
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
