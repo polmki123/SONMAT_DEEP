@@ -11,7 +11,7 @@ import glob
 from PIL import Image
 import numpy as np
 import PIL.ImageOps
-import model
+from model import *
 
 os.environ["CUDA_VISIBLE_DEVICES"] = '6'
 
