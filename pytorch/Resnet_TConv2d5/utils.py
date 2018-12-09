@@ -96,7 +96,12 @@ def check_model_result_image_v2(epoch, model, number, model_dir):
         train_loader = torch.utils.data.DataLoader(dataset=train_data, batch_size=64, shuffle=False, num_workers = 4)
         result_data = []
 
-        for _, (data_set) in enumerate(train_loader) :
+        for data_set in train_loader :
+        	if torch.cuda.is_available():
+                data_set = Variable(data_set.cuda())
+            else:
+                data_set = Variable(data_set)
+
             data_set = Variable(data_set.cuda())
             data_set = data_set.type(torch.cuda.FloatTensor)
             data_set = normalize_image(data_set)
