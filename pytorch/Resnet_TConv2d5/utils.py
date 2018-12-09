@@ -83,6 +83,34 @@ def check_model_result_image(epoch, model, number, model_dir):
             if not os.path.exists(saveimagedir):
                 os.makedirs(saveimagedir)
             img.save(saveimagedir + frame_name[number], "PNG")
+
+def check_model_result_image_v2(epoch, model, number, model_dir):
+    if epoch % 1 == 0:
+        saveimagedir = model_dir + '/result_image/' + str(number) + '/' + str(epoch) + '/'
+        inputimagedir = '/data2/hhjung/Conpress_Son/test1.jpg'
+        input_data, frame_name = input_Deepmodel_image(inputimagedir)
+        model.eval()
+        input_data = np.array(input_data)
+        train_data = torch.utils.data.TensorDataset(torch.from_numpy(input_data))
+        train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=64, shuffle=False, num_workers = 4)
+        result_data = []
+        for input in train_loader :
+            input = Variable(input.cuda())
+            input = input.type(torch.cuda.FloatTensor)
+            input = normalize_image(input)
+            output = model(input)
+            output = Variable(output[1]).data.cpu().numpy()
+            output =renormalize_image(output)
+            result.extend(output)
+            # print(output)
+        
+        for i in range(len(result_data)) :
+            output = result_data[i]
+            img = Image.fromarray(output.astype('uint8'), 'L')
+            img = img.filter(ImageFilter.SHARPEN)
+            if not os.path.exists(saveimagedir):
+                os.makedirs(saveimagedir)
+            img.save(saveimagedir + frame_name[i], "PNG")
             
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))

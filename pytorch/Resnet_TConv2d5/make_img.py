@@ -13,11 +13,11 @@ import numpy as np
 import PIL.ImageOps
 from model import *
 
-os.environ["CUDA_VISIBLE_DEVICES"] = '6'
+os.environ["CUDA_VISIBLE_DEVICES"] = '5'
 
 def main(model_dir, number):
     utils.default_model_dir = model_dir + '/model/'
-    epoch = 50
+    epoch = 2000
     start_time = time.time()
 
     model = ResNet()
@@ -38,7 +38,7 @@ def main(model_dir, number):
     else:
         model.load_state_dict(checkpoint['state_dict'])
         
-    utils.check_model_result_image(epoch, model, number, model_dir)   
+    utils.check_model_result_image_v2(epoch, model, number, model_dir)   
         
     # utils.conv_weight_L1_printing(model.module)
     now = time.gmtime(time.time() - start_time)
@@ -52,6 +52,6 @@ def do_learning(model_dir, number):
 
 if __name__ == '__main__':
     print(str(1)+'for train')	
-    main_model_dir = '/data2/hhjung/Sonmat_Result/Resnet_test2' 
+    main_model_dir = '/data2/hhjung/Sonmat_Result/Resnet_TConv2d5' 
     do_learning(main_model_dir, 1)
         
