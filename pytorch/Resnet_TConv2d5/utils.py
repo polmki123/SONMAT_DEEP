@@ -13,6 +13,7 @@ import math
 import PIL.ImageOps
 default_model_dir = "./"
 
+os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 
 def make_one_hot() :
     a = np.array([a for a in range(2350)])
@@ -91,13 +92,11 @@ def check_model_result_image_v2(epoch, model, number, model_dir):
         input_data, frame_name = input_Deepmodel_image(inputimagedir)
         model.eval()
         input_data = np.array(input_data)
-        print(input_data.shape)
         train_data = torch.utils.data.TensorDataset(torch.from_numpy(input_data))
         train_loader = torch.utils.data.DataLoader(dataset=train_data, batch_size=64, shuffle=False, num_workers = 4)
         result_data = []
 
         for _, (data_set) in enumerate(train_loader) :
-            data_set = np.array(data_set)
             data_set = Variable(data_set.cuda())
             data_set = data_set.type(torch.cuda.FloatTensor)
             data_set = normalize_image(data_set)
