@@ -90,12 +90,9 @@ def check_model_result_image_v2(epoch, model, number, model_dir):
         inputimagedir = '/data2/hhjung/Conpress_Son/test1.jpg'
         input_data, frame_name = input_Deepmodel_image(inputimagedir)
         model.eval()
-        check_data_set = []
-        for each_data in input_data :
-            check_data_set.extend(each_data)
-            
-        check_data_set = np.array(check_data_set)
-        train_data = torch.utils.data.TensorDataset(torch.from_numpy(check_data_set))
+        input_data = np.array(input_data)
+        print(input_data.shape)
+        train_data = torch.utils.data.TensorDataset(torch.from_numpy(input_data))
         train_loader = torch.utils.data.DataLoader(dataset=train_data, batch_size=64, shuffle=False, num_workers = 4)
         result_data = []
 
