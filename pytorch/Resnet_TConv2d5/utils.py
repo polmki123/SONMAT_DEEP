@@ -94,11 +94,11 @@ def check_model_result_image_v2(epoch, model, number, model_dir):
         train_data = torch.utils.data.TensorDataset(torch.from_numpy(input_data))
         train_loader = torch.utils.data.DataLoader(dataset=train_data, batch_size=64, shuffle=False, num_workers = 4)
         result_data = []
-        for input in train_loader :
-            input = Variable(input.cuda())
-            input = input.type(torch.cuda.FloatTensor)
-            input = normalize_image(input)
-            output = model(input)
+        for _, (data_set) in enumerate(train_loader) :
+            data_set = Variable(data_set.cuda())
+            data_set = data_set.type(torch.cuda.FloatTensor)
+            data_set = normalize_image(data_set)
+            output = model(data_set)
             output = Variable(output[1]).data.cpu().numpy()
             output =renormalize_image(output)
             result.extend(output)
