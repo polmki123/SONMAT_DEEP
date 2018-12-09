@@ -101,17 +101,18 @@ def check_model_result_image_v2(epoch, model, number, model_dir):
                 data_set = Variable(data_set.cuda())
             else:
                 data_set = Variable(data_set)
-                
+
             data_set = data_set.type(torch.cuda.FloatTensor)
             data_set = normalize_image(data_set)
             output = model(data_set)
             output = Variable(output[1]).data.cpu().numpy()
-            output =renormalize_image(output)
-            result.extend(output)
+            output = renormalize_image(output)
+            result_data.extend(output)
             # print(output)
         
         for i in range(len(result_data)) :
             output = result_data[i]
+            output = output.reshape(64,64)
             img = Image.fromarray(output.astype('uint8'), 'L')
             img = img.filter(ImageFilter.SHARPEN)
             if not os.path.exists(saveimagedir):
