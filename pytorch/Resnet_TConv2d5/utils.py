@@ -92,7 +92,7 @@ def check_model_result_image_v2(epoch, model, number, model_dir):
         model.eval()
         input_data = np.array(input_data)
         train_data = torch.utils.data.TensorDataset(torch.from_numpy(input_data))
-        train_loader = torch.utils.data.DataLoader(dataset=train_Data, batch_size=64, shuffle=False, num_workers = 4)
+        train_loader = torch.utils.data.DataLoader(dataset=train_data, batch_size=64, shuffle=False, num_workers = 4)
         result_data = []
         for input in train_loader :
             input = Variable(input.cuda())
