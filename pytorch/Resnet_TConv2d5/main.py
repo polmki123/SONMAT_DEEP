@@ -13,13 +13,13 @@ import numpy as np
 import PIL.ImageOps
 from model import *
 
-os.environ["CUDA_VISIBLE_DEVICES"] = '6'
+os.environ["CUDA_VISIBLE_DEVICES"] = '7'
 
 def main(model_dir, number):
     utils.default_model_dir = model_dir + '/model/'
     BATCH_SIZE = 64
     lr = 0.001
-    EPOCH = 40
+    EPOCH = 60
     start_epoch = 0
     train_Data, test_Data = utils.Package_Data_onehot_Slice_Loder(number)
     
@@ -54,11 +54,11 @@ def main(model_dir, number):
         optimizer.load_state_dict(checkpoint['optimizer'])
 
     for epoch in range(start_epoch, EPOCH+1):
-        if epoch < 9:
+        if epoch < 15:
             learning_rate = lr
-        elif epoch < 18:
-            learning_rate = lr * 0.5
         elif epoch < 30:
+            learning_rate = lr * 0.5
+        elif epoch < 45:
             learning_rate = lr * 0.2
         else:
             learning_rate = lr * 0.05

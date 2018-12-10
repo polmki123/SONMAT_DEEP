@@ -54,11 +54,11 @@ def main(model_dir, number):
         optimizer.load_state_dict(checkpoint['optimizer'])
 
     for epoch in range(start_epoch, EPOCH+1):
-        if epoch < 9:
+        if epoch < 15:
             learning_rate = lr
-        elif epoch < 18:
-            learning_rate = lr * 0.5
         elif epoch < 30:
+            learning_rate = lr * 0.5
+        elif epoch < 45:
             learning_rate = lr * 0.2
         else:
             learning_rate = lr * 0.05
